@@ -39,7 +39,7 @@ public class SupportTicket {
     private String userPhoneNumber;
 
     @Column(name = "created_at", nullable = false)
-    private LocalDateTime createAt;
+    private LocalDateTime createdAt;
 
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "user_id")

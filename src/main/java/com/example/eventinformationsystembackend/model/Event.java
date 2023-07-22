@@ -39,7 +39,7 @@ public class Event {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "currency")
-    private Currency currency = Currency.BGN;
+    private Currency currency;
 
     @Column(name = "ticket_price", nullable = false)
     private Double ticketPrice;

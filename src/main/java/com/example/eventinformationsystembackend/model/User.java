@@ -40,7 +40,7 @@ public class User {
     @Column(name = "phone_number", unique = true)
     private String phoneNumber;
 
-    @Column(name = "date_of_birth")
+    @Column(name = "date_of_birth", nullable = false)
     private LocalDate dateOfBirth;
 
     @Column(name = "address")
@@ -54,12 +54,12 @@ public class User {
 
     @Column(name = "user_role")
     @Enumerated(value = EnumType.STRING)
-    private UserRole userRole = UserRole.USER;
+    private UserRole userRole;
 
-    @Column(name = "is_locked", nullable = false)
+    @Column(name = "is_locked", nullable = false, columnDefinition = "TINYINT(1) DEFAULT FALSE")
     private Boolean isLocked;
 
-    @Column(name = "is_enabled", nullable = false)
+    @Column(name = "is_enabled", nullable = false, columnDefinition = "TINYINT(1) DEFAULT FALSE")
     private Boolean isEnabled;
 
     @OneToMany(mappedBy = "user")
