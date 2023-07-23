@@ -18,7 +18,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class UserDto {
     @NotBlank(message = "First name field should not be blank!")
-    @Size(max = 20)
+    @Size(max = 255)
     private String firstName;
 
     @NotBlank(message = "Last name field should not be blank!")
@@ -47,6 +47,6 @@ public class UserDto {
     @Size(max = 255)
     private String address;
 
-    @Size(max = 255)
+    @Size(max = 65535)
     private String description;
 }

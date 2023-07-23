@@ -18,7 +18,7 @@ public class Comment {
     @Column(name = "comment_id")
     private Long id;
 
-    @Column(name = "comment_body", nullable = false, columnDefinition = "TINYTEXT")
+    @Column(name = "comment_body", nullable = false)
     private String commentBody;
 
     @ManyToOne

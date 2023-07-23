@@ -25,7 +25,7 @@ public class Event {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "description", nullable = false, columnDefinition = "TINYTEXT")
+    @Column(name = "description", nullable = false, columnDefinition = "TEXT")
     private String description;
 
     @Column(name = "location", nullable = false)

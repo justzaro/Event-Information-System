@@ -26,7 +26,7 @@ public class Artist {
     @Column(name = "last_name", nullable = false)
     private String lastName;
 
-    @Column(name = "description", columnDefinition = "TINYTEXT")
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
     @Column(name = "profile_picture_path", nullable = false)

@@ -21,7 +21,7 @@ public class Post {
     @Column(name = "post_id")
     private Long id;
 
-    @Column(name = "description", columnDefinition = "TINYTEXT")
+    @Column(name = "description")
     private String description;
 
     @Column(name = "posted_at", nullable = false)

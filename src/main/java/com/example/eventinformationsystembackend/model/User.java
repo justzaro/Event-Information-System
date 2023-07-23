@@ -46,7 +46,7 @@ public class User {
     @Column(name = "address")
     private String address;
 
-    @Column(name = "description", columnDefinition = "TINYTEXT")
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
     @Column(name = "profile_picture_path", nullable = false)
