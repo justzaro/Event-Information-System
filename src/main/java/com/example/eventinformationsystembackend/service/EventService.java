@@ -3,13 +3,14 @@ package com.example.eventinformationsystembackend.service;
 import com.example.eventinformationsystembackend.common.enums.Currency;
 import com.example.eventinformationsystembackend.dto.EventDto;
 import com.example.eventinformationsystembackend.dto.EventDtoResponse;
+import com.example.eventinformationsystembackend.exception.ResourceNotFoundException;
 import com.example.eventinformationsystembackend.model.Event;
 import com.example.eventinformationsystembackend.repository.EventRepository;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import static com.example.eventinformationsystembackend.common.ExceptionMessages.*;
 @Service
 public class EventService {
     private final EventRepository eventRepository;
@@ -23,7 +24,7 @@ public class EventService {
 
     public EventDtoResponse getEvent(Long id) {
         Event event = eventRepository.findById(id)
-                .orElseThrow(() -> new IllegalStateException("no such event"));
+                .orElseThrow(() -> new ResourceNotFoundException(EVENT_DOES_NOT_EXIST));
 
         return modelMapper.map(event, EventDtoResponse.class);
     }

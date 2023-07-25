@@ -44,6 +44,7 @@ public class EventDto {
     @EnumValidatorConstraint(enumClass = Currency.class, message = "Invalid currency type!")
     private Currency currency;
 
+    //Catch JSON parse error?
     @DecimalMin(value = "1", message = "Minimal ticket price should be 1!")
     private Double ticketPrice;
 }

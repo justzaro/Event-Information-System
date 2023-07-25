@@ -70,4 +70,7 @@ public class User {
 
     @OneToMany(mappedBy = "user")
     private List<SupportTicket> supportTickets;
+
+    @OneToMany(mappedBy = "user")
+    private List<ConfirmationToken> confirmationTokens;
 }
