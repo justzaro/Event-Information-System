@@ -27,21 +27,21 @@ public class SupportTicket {
     private String description;
 
     @Column(name = "user_first_name", nullable = false)
-    private String userFirstName;
+    private String customerFirstName;
 
     @Column(name = "user_last_name", nullable = false)
-    private String userLastName;
+    private String customerLastName;
 
     @Column(name = "user_email", nullable = false)
-    private String userEmail;
+    private String customerEmail;
 
     @Column(name = "user_phone_number", nullable = false)
-    private String userPhoneNumber;
+    private String customerPhoneNumber;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "user_id")
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false)
     private User user;
 }

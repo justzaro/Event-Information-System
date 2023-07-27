@@ -64,13 +64,13 @@ public class ConfirmationTokenService {
             throw new ResourceNotFoundException(TOKEN_HAS_EXPIRED);
         }
 
-        setConfirmedAt(token);
+        updateTokenConfirmedAtField(token);
         userRepository.updateIsEnabledField(confirmationToken.getUser().getUsername());
 
         return "confirmed";
     }
 
-    public void setConfirmedAt(String token) {
+    public void updateTokenConfirmedAtField(String token) {
         confirmationTokenRepository.updateConfirmedAtField(token, LocalDateTime.now());
     }
 }

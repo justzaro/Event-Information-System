@@ -3,6 +3,7 @@ package com.example.eventinformationsystembackend.dto;
 import com.example.eventinformationsystembackend.common.enums.UserRole;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -53,4 +55,6 @@ public class UserDtoResponse {
     private Boolean isLocked;
 
     private Boolean isEnabled;
+
+    private List<SupportTicketDtoResponse> supportTickets;
 }

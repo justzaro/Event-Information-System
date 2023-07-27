@@ -12,11 +12,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.modelmapper.ModelMapper;
 import org.springframework.ui.Model;
+import org.springframework.web.multipart.MultipartFile;
+
 import static com.example.eventinformationsystembackend.common.ExceptionMessages.*;
 import static com.example.eventinformationsystembackend.common.FilePaths.*;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.module.ResolutionException;
+import java.nio.file.Files;
 
 @Service
 public class UserService {
@@ -44,7 +48,7 @@ public class UserService {
         return modelMapper.map(user, UserDtoResponse.class);
     }
 
-    public UserDtoResponse registerUser(UserDto userDto) {
+    public UserDtoResponse registerUser(UserDto userDto, MultipartFile profilePicture) {
         if (userRepository.findUserByUsername(userDto.getUsername()).isPresent()) {
             throw new DuplicateUniqueFieldException(USERNAME_ALREADY_EXISTS);
         }
@@ -59,14 +63,23 @@ public class UserService {
 
         User userToRegister = modelMapper.map(userDto, User.class);
 
+        String userFolderPath = USERS_FOLDER_PATH + userToRegister.getUsername();
+        String userProfilePicturePath = userFolderPath + "\\" + profilePicture.getOriginalFilename();
+
         userToRegister.setUserRole(UserRole.USER);
         userToRegister.setIsEnabled(false);
         userToRegister.setIsLocked(false);
-        userToRegister.setProfilePicturePath("asd");
+        userToRegister.setProfilePicturePath(userProfilePicturePath);
 
-        new File(USERS_FOLDER_PATH + userToRegister.getUsername()).mkdirs();
+        new File(userFolderPath).mkdirs();
 
         userRepository.save(userToRegister);
+
+        try {
+            uploadProfilePictureToFileSystem(profilePicture, userProfilePicturePath);
+        } catch (IOException e) {
+
+        }
 
         String confirmationToken =
                 confirmationTokenService.createToken(userToRegister);
@@ -84,6 +97,20 @@ public class UserService {
 
     private void sendConfirmationLink(User userToRegister, String confirmationLink) {
         emailService.sendConfirmationEmail(userToRegister, confirmationLink);
+    }
+
+    private void uploadProfilePictureToFileSystem(MultipartFile profilePicture,
+                                                  String path) throws IOException {
+        profilePicture.transferTo(new File(path));
+    }
+
+    public byte[] getUserProfilePicture(String username) throws IOException {
+        User user = userRepository.findUserByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException(USER_DOES_NOT_EXIST));
+        String profilePicturePath = user.getProfilePicturePath();
+        byte[] profilePicture =
+                Files.readAllBytes(new File(profilePicturePath).toPath());
+        return profilePicture;
     }
 
 }

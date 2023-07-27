@@ -7,4 +7,7 @@ public class FilePaths {
     public static final String EVENTS_FOLDER_PATH =
             "D:\\Java Projects\\event-information-system-images\\Events\\";
 
+    public static final String ARTISTS_FOLDER_PATH =
+            "D:\\Java Projects\\event-information-system-images\\Artists\\";
+
 }

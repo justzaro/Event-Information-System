@@ -28,10 +28,10 @@ public class Order {
     private Double totalPrice;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "user_id")
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false)
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "event_id", referencedColumnName = "event_id")
+    @JoinColumn(name = "event_id", referencedColumnName = "event_id", nullable = false)
     private Event event;
 }

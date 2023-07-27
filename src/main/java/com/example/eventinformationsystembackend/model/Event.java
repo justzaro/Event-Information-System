@@ -41,6 +41,9 @@ public class Event {
     @Column(name = "currency")
     private Currency currency;
 
+    @Column(name = "capacity")
+    private Integer capacity;
+
     @Column(name = "ticket_price", nullable = false)
     private Double ticketPrice;
 
@@ -49,4 +52,12 @@ public class Event {
 
     @OneToMany(mappedBy = "event")
     private List<Order> orders;
+
+    @ManyToMany
+    @JoinTable(
+            name = "events_artists",
+            joinColumns = @JoinColumn(name = "event_id"),
+            inverseJoinColumns = @JoinColumn(name = "artist_id")
+    )
+    private List<Artist> artists;
 }

@@ -27,8 +27,12 @@ public class Post {
     @Column(name = "posted_at", nullable = false)
     private LocalDateTime postedAt;
 
+    //add picture path
+    @Column(name = "post_picture_path", nullable = false)
+    private String postPicturePath;
+
     @ManyToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "user_id")
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false)
     private User user;
 
     @OneToMany(mappedBy = "post")

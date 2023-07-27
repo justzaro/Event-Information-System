@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Getter
@@ -31,4 +32,7 @@ public class Artist {
 
     @Column(name = "profile_picture_path", nullable = false)
     private String profilePicturePath;
+
+    @ManyToMany(mappedBy = "artists")
+    private List<Event> events;
 }

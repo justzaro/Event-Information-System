@@ -73,4 +73,7 @@ public class User {
 
     @OneToMany(mappedBy = "user")
     private List<ConfirmationToken> confirmationTokens;
+
+    @OneToMany(mappedBy = "user")
+    private List<Comment> comments;
 }
