@@ -49,7 +49,6 @@ public class ArtistService {
 
         Artist artistToAdd = modelMapper.map(artistDto, Artist.class);
 
-
         String artistFolderPath =
                 ARTISTS_FOLDER_PATH + artistDto.getFirstName() + " " + artistDto.getLastName();
 

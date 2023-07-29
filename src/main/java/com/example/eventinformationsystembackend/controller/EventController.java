@@ -1,9 +1,6 @@
 package com.example.eventinformationsystembackend.controller;
 
-import com.example.eventinformationsystembackend.dto.EventDto;
-import com.example.eventinformationsystembackend.dto.EventDtoResponse;
-import com.example.eventinformationsystembackend.dto.UserDto;
-import com.example.eventinformationsystembackend.dto.UserDtoResponse;
+import com.example.eventinformationsystembackend.dto.*;
 import com.example.eventinformationsystembackend.service.EventService;
 import jakarta.validation.Valid;
 import org.apache.coyote.Response;
@@ -15,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping(path = "/events")
@@ -42,10 +40,12 @@ public class EventController {
                     .body(eventPicture);
     }
 
-/*    @GetMapping(path = "/{id}")
-    public EventDtoResponse getEventById(@PathVariable("id") Long id) {
-        return eventService.getEvent(id);
-    }*/
+    @PutMapping(path = "/update/{eventId}")
+    public EventDtoResponse addArtistsToEvent(@PathVariable("eventId") Long eventId,
+                                              @RequestPart @Valid EventDto eventDto,
+                                              @RequestPart MultipartFile eventPicture) {
+        return eventService.updateEvent(eventId, eventDto, eventPicture);
+    }
     @GetMapping(path = "/{name}")
     public EventDtoResponse getEventByName(@PathVariable("name") String name) {
         return eventService.getEvent(name);

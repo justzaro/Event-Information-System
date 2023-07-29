@@ -53,7 +53,7 @@ public class Event {
     @OneToMany(mappedBy = "event")
     private List<Order> orders;
 
-    @ManyToMany
+    @ManyToMany()
     @JoinTable(
             name = "events_artists",
             joinColumns = @JoinColumn(name = "event_id"),

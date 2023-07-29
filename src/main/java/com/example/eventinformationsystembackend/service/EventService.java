@@ -1,10 +1,13 @@
 package com.example.eventinformationsystembackend.service;
 
 import com.example.eventinformationsystembackend.common.enums.Currency;
+import com.example.eventinformationsystembackend.dto.ArtistDto;
+import com.example.eventinformationsystembackend.dto.ArtistDtoResponse;
 import com.example.eventinformationsystembackend.dto.EventDto;
 import com.example.eventinformationsystembackend.dto.EventDtoResponse;
 import com.example.eventinformationsystembackend.exception.DuplicateUniqueFieldException;
 import com.example.eventinformationsystembackend.exception.ResourceNotFoundException;
+import com.example.eventinformationsystembackend.model.Artist;
 import com.example.eventinformationsystembackend.model.Event;
 import com.example.eventinformationsystembackend.model.User;
 import com.example.eventinformationsystembackend.repository.EventRepository;
@@ -17,6 +20,10 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.example.eventinformationsystembackend.common.ExceptionMessages.*;
 import static com.example.eventinformationsystembackend.common.FilePaths.EVENTS_FOLDER_PATH;
@@ -78,7 +85,7 @@ public class EventService {
 
         }
 
-        return modelMapper.map(eventDto, EventDtoResponse.class);
+        return modelMapper.map(eventToAdd, EventDtoResponse.class);
     }
 
     private void uploadEventPictureToFileSystem(MultipartFile eventPicture,
@@ -93,6 +100,53 @@ public class EventService {
         byte[] eventPicture =
                 Files.readAllBytes(new File(eventPicturePath).toPath());
         return eventPicture;
+    }
+
+    public EventDtoResponse updateEvent(Long eventId, EventDto eventDto,
+                                              MultipartFile eventPicture) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new ResourceNotFoundException(EVENT_DOES_NOT_EXIST));
+
+        event.setName(eventDto.getName());
+        event.setDescription(eventDto.getDescription());
+        event.setLocation(eventDto.getLocation());
+        event.setStartDate(eventDto.getStartDate());
+        event.setEndDate(eventDto.getEndDate());
+        event.setCurrency(eventDto.getCurrency());
+        event.setTicketPrice(eventDto.getTicketPrice());
+
+        String eventFolderPath = EVENTS_FOLDER_PATH + eventDto.getName();
+
+        List<Artist> artists = event.getArtists();
+
+        List<Artist> newArtists
+                = eventDto.getArtists()
+                .stream()
+                .map(artistDtoResponse -> modelMapper.map(artistDtoResponse, Artist.class)).toList();
+
+        int arrSize = artists.size();
+
+        for (int i = 0; i < arrSize; i++) {
+            artists.remove(i);
+        }
+
+        for (Artist artist : newArtists) {
+            event.getArtists().add(artist);
+        }
+
+        event.setEventPicturePath(eventFolderPath + "\\" + eventPicture.getOriginalFilename());
+
+        modelMapper.map(event, Event.class);
+        eventRepository.save(event);
+
+        try {
+            uploadEventPictureToFileSystem(eventPicture, eventFolderPath + "\\"
+                    + eventPicture.getOriginalFilename());
+        } catch (IOException e) {
+
+        }
+
+        return modelMapper.map(event, EventDtoResponse.class);
     }
 
 }

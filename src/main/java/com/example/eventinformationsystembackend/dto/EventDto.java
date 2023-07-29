@@ -48,4 +48,6 @@ public class EventDto {
 
     @DecimalMin(value = "1", message = "Minimal ticket price should be 1")
     private Double ticketPrice;
+
+    private List<ArtistDtoResponse> artists;
 }
