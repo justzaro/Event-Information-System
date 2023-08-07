@@ -21,5 +21,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Modifying
     @Query(value = "UPDATE users SET is_enabled = true WHERE username = :username",
            nativeQuery = true)
-    void updateIsEnabledField(@Param("username") String username);
+    void updateIsEnabledColumn(@Param("username") String username);
 }

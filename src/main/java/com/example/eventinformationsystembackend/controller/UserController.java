@@ -38,13 +38,6 @@ public class UserController {
         return userService.getUser(username);
     }
 
-    @PostMapping(path = "/register", consumes = { MediaType.APPLICATION_JSON_VALUE,
-                                                     MediaType.MULTIPART_FORM_DATA_VALUE })
-    public UserDtoResponse registerUser(@Valid @RequestPart UserDto userDto,
-                                        @RequestPart("profilePicture") MultipartFile profilePicture) {
-        return userService.registerUser(userDto, profilePicture);
-    }
-
     @GetMapping(path = "/profile-picture/{username}")
     public ResponseEntity<?> getUserProfilePicture(
             @PathVariable("username") String username) throws IOException {
@@ -54,4 +47,23 @@ public class UserController {
                 .body(profilePicture);
     }
 
+    @PostMapping(path = "/register", consumes = { MediaType.APPLICATION_JSON_VALUE,
+                                                     MediaType.MULTIPART_FORM_DATA_VALUE })
+    public UserDtoResponse registerUser(@Valid @RequestPart UserDto userDto,
+                                        @RequestPart(required = false) MultipartFile profilePicture) {
+        return userService.registerUser(userDto, profilePicture);
+    }
+
+    @PutMapping(path = "/update/{username}")
+    public UserDtoResponse updateUser(@PathVariable("username") String username,
+                                      @RequestPart @Valid UserDto userDto,
+                                      @RequestPart(required = false) MultipartFile profilePicture) {
+        return userService.updateUser(userDto, username, profilePicture);
+    }
+
+    @DeleteMapping(path = "/delete/{username}")
+    public ResponseEntity<Void> deleteUser(@PathVariable("username") String username) {
+        userService.deleteUser(username);
+        return ResponseEntity.noContent().build();
+    }
 }

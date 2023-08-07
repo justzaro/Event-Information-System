@@ -24,6 +24,9 @@ public class Post {
     @Column(name = "description")
     private String description;
 
+    @Column(name = "location")
+    private String location;
+
     @Column(name = "posted_at", nullable = false)
     private LocalDateTime postedAt;
 

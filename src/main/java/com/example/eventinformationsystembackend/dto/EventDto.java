@@ -6,10 +6,7 @@ import com.example.eventinformationsystembackend.model.Artist;
 import com.example.eventinformationsystembackend.model.Order;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -41,6 +38,12 @@ public class EventDto {
 
     @JsonFormat(pattern = "HH:mm dd-MM-yyyy")
     private LocalDateTime endDate;
+
+    @NotNull(message = "Capacity field must not be null!")
+    private Integer capacity;
+
+    @NotNull(message = "Is active field must not be null!")
+    private Boolean isActive;
 
     //doesn't throw error message
     //@EnumValidatorConstraint(enumClass = Currency.class, message = "Invalid currency type!")

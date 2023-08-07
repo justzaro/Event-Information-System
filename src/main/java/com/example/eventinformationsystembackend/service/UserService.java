@@ -29,16 +29,18 @@ public class UserService {
     private final ModelMapper modelMapper;
     private final ConfirmationTokenService confirmationTokenService;
     private final EmailService emailService;
-
+    private final StorageService storageService;
 
     @Autowired
     public UserService(UserRepository userRepository,
                        ConfirmationTokenService confirmationTokenService,
-                       EmailService emailService) {
+                       EmailService emailService,
+                       StorageService storageService) {
         this.userRepository = userRepository;
         this.modelMapper = new ModelMapper();
         this.confirmationTokenService = confirmationTokenService;
         this.emailService = emailService;
+        this.storageService = storageService;
     }
 
     public UserDtoResponse getUser(String username) {
@@ -49,21 +51,19 @@ public class UserService {
     }
 
     public UserDtoResponse registerUser(UserDto userDto, MultipartFile profilePicture) {
-        if (userRepository.findUserByUsername(userDto.getUsername()).isPresent()) {
-            throw new DuplicateUniqueFieldException(USERNAME_ALREADY_EXISTS);
-        }
+        checkForDuplicateUsername(userDto.getUsername());
+        checkForDuplicateEmail(userDto.getEmail());
 
-        if (userRepository.findUserByEmail(userDto.getUsername()).isPresent()) {
-            throw new DuplicateUniqueFieldException(EMAIL_ALREADY_EXISTS);
-        }
-
-        if (userRepository.findUserByPhoneNumber(userDto.getUsername()).isPresent()) {
-            throw new DuplicateUniqueFieldException(PHONE_NUMBER_ALREADY_EXISTS);
+        if (userDto.getPhoneNumber() != null) {
+            if (!userDto.getPhoneNumber().isEmpty()) {
+                checkForDuplicatePhoneNumber(userDto.getPhoneNumber());
+            }
         }
 
         User userToRegister = modelMapper.map(userDto, User.class);
 
         String userFolderPath = USERS_FOLDER_PATH + userToRegister.getUsername();
+        String userPostsFolderPath = userFolderPath + "\\" + "Posts";
         String userProfilePicturePath = userFolderPath + "\\" + profilePicture.getOriginalFilename();
 
         userToRegister.setUserRole(UserRole.USER);
@@ -71,15 +71,16 @@ public class UserService {
         userToRegister.setIsLocked(false);
         userToRegister.setProfilePicturePath(userProfilePicturePath);
 
-        new File(userFolderPath).mkdirs();
+        storageService.createFolder(userFolderPath);
+        storageService.createFolder(userPostsFolderPath);
+
+        if (profilePicture != null) {
+            if (!profilePicture.isEmpty()) {
+                storageService.savePictureToFileSystem(profilePicture, userProfilePicturePath);
+            }
+        }
 
         userRepository.save(userToRegister);
-
-        try {
-            uploadProfilePictureToFileSystem(profilePicture, userProfilePicturePath);
-        } catch (IOException e) {
-
-        }
 
         String confirmationToken =
                 confirmationTokenService.createToken(userToRegister);
@@ -91,17 +92,54 @@ public class UserService {
         return modelMapper.map(userToRegister, UserDtoResponse.class);
     }
 
-    private void createUserFolder(User userToRegister) {
-        new File(USERS_FOLDER_PATH + userToRegister.getUsername()).mkdirs();
-    }
+    public UserDtoResponse updateUser(UserDto userDto, String username,
+                                      MultipartFile profilePicture) {
+        User user = userRepository.findUserByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException(USER_DOES_NOT_EXIST));
 
-    private void sendConfirmationLink(User userToRegister, String confirmationLink) {
-        emailService.sendConfirmationEmail(userToRegister, confirmationLink);
-    }
+        if (!user.getUsername().equals(userDto.getUsername())) {
+            checkForDuplicateUsername(userDto.getUsername());
+        }
 
-    private void uploadProfilePictureToFileSystem(MultipartFile profilePicture,
-                                                  String path) throws IOException {
-        profilePicture.transferTo(new File(path));
+        if (!user.getEmail().equals(userDto.getEmail())) {
+            checkForDuplicateEmail(userDto.getEmail());
+        }
+
+        if (userDto.getPhoneNumber() != null) {
+            if (!user.getPhoneNumber().equals(userDto.getPhoneNumber())) {
+                checkForDuplicatePhoneNumber(userDto.getPhoneNumber());
+            }
+        }
+
+        String userFolderPath = USERS_FOLDER_PATH + user.getUsername();
+        String renamedUserFolderPath = USERS_FOLDER_PATH + userDto.getUsername();
+
+        user.setFirstName(userDto.getFirstName());
+        user.setLastName(userDto.getLastName());
+        user.setUsername(userDto.getUsername());
+        user.setPassword(userDto.getPassword());
+        user.setEmail(userDto.getEmail());
+        user.setPhoneNumber(userDto.getPhoneNumber());
+        user.setDateOfBirth(userDto.getDateOfBirth());
+        user.setAddress(userDto.getAddress());
+        user.setDescription(userDto.getDescription());
+
+        storageService.renameFolder(userFolderPath, renamedUserFolderPath);
+
+        if (profilePicture != null) {
+            if (!profilePicture.isEmpty()) {
+                String userProfilePicturePath = renamedUserFolderPath + "\\"
+                        + profilePicture.getOriginalFilename();
+
+                storageService.savePictureToFileSystem(profilePicture, userProfilePicturePath);
+
+                user.setProfilePicturePath(userProfilePicturePath);
+            }
+        }
+
+        User updatedUser = userRepository.save(user);
+
+        return modelMapper.map(updatedUser, UserDtoResponse.class);
     }
 
     public byte[] getUserProfilePicture(String username) throws IOException {
@@ -113,4 +151,32 @@ public class UserService {
         return profilePicture;
     }
 
+    public void deleteUser(String username) {
+        User user = userRepository.findUserByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException(USER_DOES_NOT_EXIST));
+
+        String userFolderPath = USERS_FOLDER_PATH + user.getUsername();
+
+        storageService.deleteFolder(userFolderPath);
+
+        userRepository.delete(user);
+    }
+
+    private void checkForDuplicateUsername(String username) {
+        if (userRepository.findUserByUsername(username).isPresent()) {
+            throw new DuplicateUniqueFieldException(USERNAME_ALREADY_EXISTS);
+        }
+    }
+
+    private void checkForDuplicateEmail(String email) {
+        if (userRepository.findUserByEmail(email).isPresent()) {
+            throw new DuplicateUniqueFieldException(EMAIL_ALREADY_EXISTS);
+        }
+    }
+
+    private void checkForDuplicatePhoneNumber(String phoneNumber) {
+        if (userRepository.findUserByPhoneNumber(phoneNumber).isPresent()) {
+            throw new DuplicateUniqueFieldException(PHONE_NUMBER_ALREADY_EXISTS);
+        }
+    }
 }

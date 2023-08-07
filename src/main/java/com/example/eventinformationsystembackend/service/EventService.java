@@ -6,6 +6,7 @@ import com.example.eventinformationsystembackend.dto.ArtistDtoResponse;
 import com.example.eventinformationsystembackend.dto.EventDto;
 import com.example.eventinformationsystembackend.dto.EventDtoResponse;
 import com.example.eventinformationsystembackend.exception.DuplicateUniqueFieldException;
+import com.example.eventinformationsystembackend.exception.InvalidEventDateException;
 import com.example.eventinformationsystembackend.exception.ResourceNotFoundException;
 import com.example.eventinformationsystembackend.model.Artist;
 import com.example.eventinformationsystembackend.model.Event;
@@ -32,11 +33,14 @@ import static com.example.eventinformationsystembackend.common.FilePaths.USERS_F
 @Service
 public class EventService {
     private final EventRepository eventRepository;
+    private final StorageService storageService;
     private final ModelMapper modelMapper;
 
     @Autowired
-    public EventService(EventRepository eventRepository) {
+    public EventService(EventRepository eventRepository,
+                        StorageService storageService) {
         this.eventRepository = eventRepository;
+        this.storageService = storageService;
         this.modelMapper = new ModelMapper();
     }
 
@@ -60,37 +64,31 @@ public class EventService {
         }
 
         if (eventDto.getStartDate().isAfter(eventDto.getEndDate())) {
-            throw new IllegalStateException("start date is after end date");
+            throw new InvalidEventDateException(START_DATE_IS_AFTER_END_DATE);
         }
 
         if (eventDto.getStartDate().isEqual(eventDto.getEndDate())) {
-            throw new IllegalStateException("start and end date should not be equal");
+            throw new InvalidEventDateException(EQUAL_START_AND_END_DATE);
         }
 
         Event eventToAdd = modelMapper.map(eventDto, Event.class);
 
         String eventFolderPath = EVENTS_FOLDER_PATH + eventToAdd.getName();
+        String eventPicturePath = eventFolderPath + "\\" + eventPicture.getOriginalFilename();
 
-        eventToAdd.setCurrency(Currency.BGN);
-        eventToAdd.setEventPicturePath(eventFolderPath + "\\" + eventPicture.getOriginalFilename());
+        if (eventDto.getCurrency() == null) {
+            eventToAdd.setCurrency(Currency.BGN);
+        }
 
-        new File(eventFolderPath).mkdirs();
+        eventToAdd.setEventPicturePath(eventPicturePath);
+        eventToAdd.setIsActive(true);
 
         eventRepository.save(eventToAdd);
 
-        try {
-            uploadEventPictureToFileSystem(eventPicture, eventFolderPath + "\\"
-                    + eventPicture.getOriginalFilename());
-        } catch (IOException e) {
-
-        }
+        storageService.createFolder(eventFolderPath);
+        storageService.savePictureToFileSystem(eventPicture, eventPicturePath);
 
         return modelMapper.map(eventToAdd, EventDtoResponse.class);
-    }
-
-    private void uploadEventPictureToFileSystem(MultipartFile eventPicture,
-                                                String path) throws IOException {
-        eventPicture.transferTo(new File(path));
     }
 
     public byte[] getEventPicture(String eventName) throws IOException {
@@ -107,6 +105,12 @@ public class EventService {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new ResourceNotFoundException(EVENT_DOES_NOT_EXIST));
 
+        String eventFolderPath = EVENTS_FOLDER_PATH + event.getName();
+
+        if (eventRepository.findEventByName(eventDto.getName()).isPresent()) {
+            throw new DuplicateUniqueFieldException(EVENT_NAME_ALREADY_EXISTS);
+        }
+
         event.setName(eventDto.getName());
         event.setDescription(eventDto.getDescription());
         event.setLocation(eventDto.getLocation());
@@ -114,8 +118,7 @@ public class EventService {
         event.setEndDate(eventDto.getEndDate());
         event.setCurrency(eventDto.getCurrency());
         event.setTicketPrice(eventDto.getTicketPrice());
-
-        String eventFolderPath = EVENTS_FOLDER_PATH + eventDto.getName();
+        event.setCapacity(eventDto.getCapacity());
 
         List<Artist> artists = event.getArtists();
 
@@ -124,29 +127,31 @@ public class EventService {
                 .stream()
                 .map(artistDtoResponse -> modelMapper.map(artistDtoResponse, Artist.class)).toList();
 
-        int arrSize = artists.size();
-
-        for (int i = 0; i < arrSize; i++) {
-            artists.remove(i);
-        }
+        artists.clear();
 
         for (Artist artist : newArtists) {
             event.getArtists().add(artist);
         }
 
-        event.setEventPicturePath(eventFolderPath + "\\" + eventPicture.getOriginalFilename());
+        String newEventPath = EVENTS_FOLDER_PATH + eventDto.getName();
+        String newEventPicturePath = newEventPath + "\\" + eventPicture.getOriginalFilename();
 
-        modelMapper.map(event, Event.class);
+        storageService.renameFolder(eventFolderPath, newEventPath);
+        storageService.savePictureToFileSystem(eventPicture, newEventPicturePath);
+
         eventRepository.save(event);
-
-        try {
-            uploadEventPictureToFileSystem(eventPicture, eventFolderPath + "\\"
-                    + eventPicture.getOriginalFilename());
-        } catch (IOException e) {
-
-        }
 
         return modelMapper.map(event, EventDtoResponse.class);
     }
 
+    public void deleteEvent(Long eventId) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new ResourceNotFoundException(EVENT_DOES_NOT_EXIST));
+
+        String eventFolderPath = EVENTS_FOLDER_PATH + event.getName();
+
+        storageService.deleteFolder(eventFolderPath);
+
+        eventRepository.delete(event);
+    }
 }

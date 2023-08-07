@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Setter
@@ -26,6 +28,9 @@ public class Order {
 
     @Column(name = "total_price", nullable = false)
     private Double totalPrice;
+
+    @Column(name = "date_of_order", nullable = false)
+    private LocalDateTime dateOfOrder;
 
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false)

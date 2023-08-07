@@ -46,8 +46,9 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(DuplicateUniqueFieldException.class)
-    public ResponseEntity<ErrorResponse> handleDuplicateUniqueFieldException(DuplicateUniqueFieldException e) {
+    @ExceptionHandler({DuplicateUniqueFieldException.class,
+                       NotEnoughSeatsException.class})
+    public ResponseEntity<ErrorResponse> handleDuplicateUniqueFieldException(Exception e) {
         ErrorResponse errorResponse = new ErrorResponse();
 
         errorResponse.setStatus(HttpStatus.CONFLICT.value());
@@ -55,6 +56,17 @@ public class GlobalExceptionHandler {
         errorResponse.setTimestamp(LocalDateTime.now());
 
         return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(InvalidEventDateException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidEventDateException(Exception e) {
+        ErrorResponse errorResponse = new ErrorResponse();
+
+        errorResponse.setStatus(HttpStatus.BAD_REQUEST.value());
+        errorResponse.setMessage(e.getMessage());
+        errorResponse.setTimestamp(LocalDateTime.now());
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
     //add resource not found exception, then make more normal exception
     //ie usernotfound which implement it

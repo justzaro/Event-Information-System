@@ -41,7 +41,7 @@ public class Event {
     @Column(name = "currency")
     private Currency currency;
 
-    @Column(name = "capacity")
+    @Column(name = "capacity", nullable = false)
     private Integer capacity;
 
     @Column(name = "ticket_price", nullable = false)
@@ -49,6 +49,9 @@ public class Event {
 
     @Column(name = "event_picture_path", nullable = false)
     private String eventPicturePath;
+
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive;
 
     @OneToMany(mappedBy = "event")
     private List<Order> orders;

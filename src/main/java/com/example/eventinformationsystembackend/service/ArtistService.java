@@ -23,11 +23,14 @@ import static com.example.eventinformationsystembackend.common.FilePaths.*;
 @Service
 public class ArtistService {
     private final ArtistRepository artistRepository;
+    private final StorageService storageService;
     private final ModelMapper modelMapper;
 
     @Autowired
-    public ArtistService(ArtistRepository artistRepository) {
+    public ArtistService(ArtistRepository artistRepository,
+                         StorageService storageService) {
         this.artistRepository = artistRepository;
+        this.storageService = storageService;
         this.modelMapper = new ModelMapper();
     }
 
@@ -51,17 +54,12 @@ public class ArtistService {
 
         String artistFolderPath =
                 ARTISTS_FOLDER_PATH + artistDto.getFirstName() + " " + artistDto.getLastName();
+        String profilePicturePath = artistFolderPath + "\\" + profilePicture.getOriginalFilename();
 
-        artistToAdd.setProfilePicturePath(artistFolderPath + "\\" + profilePicture.getOriginalFilename());
+        artistToAdd.setProfilePicturePath(profilePicturePath);
 
-        new File(artistFolderPath).mkdirs();
-
-        try {
-            uploadEventPictureToFileSystem(profilePicture,
-                    artistFolderPath + "\\" + profilePicture.getOriginalFilename());
-        } catch (IOException e) {
-
-        }
+        storageService.createFolder(artistFolderPath);
+        storageService.savePictureToFileSystem(profilePicture, profilePicturePath);
 
         return modelMapper.map(artistRepository.save(artistToAdd), ArtistDtoResponse.class);
 

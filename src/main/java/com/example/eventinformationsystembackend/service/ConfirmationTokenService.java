@@ -65,7 +65,7 @@ public class ConfirmationTokenService {
         }
 
         updateTokenConfirmedAtField(token);
-        userRepository.updateIsEnabledField(confirmationToken.getUser().getUsername());
+        userRepository.updateIsEnabledColumn(confirmationToken.getUser().getUsername());
 
         return "confirmed";
     }

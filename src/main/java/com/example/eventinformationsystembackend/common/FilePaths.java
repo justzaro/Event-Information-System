@@ -9,5 +9,4 @@ public class FilePaths {
 
     public static final String ARTISTS_FOLDER_PATH =
             "D:\\Java Projects\\event-information-system-images\\Artists\\";
-
 }

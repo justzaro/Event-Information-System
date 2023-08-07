@@ -5,6 +5,7 @@ import com.example.eventinformationsystembackend.model.Artist;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -35,6 +36,12 @@ public class EventDtoResponse {
 
     @JsonFormat(pattern = "HH:mm dd-MM-yyyy")
     private LocalDateTime endDate;
+
+    @NotNull
+    private Integer capacity;
+
+    @NotNull
+    private Boolean isActive;
 
     private Currency currency;
 
