@@ -38,8 +38,13 @@ public class EventController {
         return eventService.getEvent(name);
     }
 
+    @GetMapping
+    public List<EventDtoResponse> getAllEvents() {
+        return eventService.getAllEvents();
+    }
+
     @PostMapping(path = "/add", consumes = { MediaType.APPLICATION_JSON_VALUE,
-            MediaType.MULTIPART_FORM_DATA_VALUE })
+                                                MediaType.MULTIPART_FORM_DATA_VALUE })
     public EventDtoResponse addEvent(@Valid @RequestPart EventDto eventDto,
                                      @RequestPart("eventPicture") MultipartFile eventPicture) {
         return eventService.addEvent(eventDto, eventPicture);

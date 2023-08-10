@@ -58,7 +58,9 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
     }
 
-    @ExceptionHandler(InvalidEventDateException.class)
+    @ExceptionHandler({InvalidEventDateException.class,
+                       CouponHasExpiredException.class,
+                       CouponHasBeenUsedException.class})
     public ResponseEntity<ErrorResponse> handleInvalidEventDateException(Exception e) {
         ErrorResponse errorResponse = new ErrorResponse();
 

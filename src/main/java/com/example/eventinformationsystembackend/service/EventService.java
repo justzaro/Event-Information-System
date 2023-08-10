@@ -58,6 +58,15 @@ public class EventService {
         return modelMapper.map(event, EventDtoResponse.class);
     }
 
+    public List<EventDtoResponse> getAllEvents() {
+        List<Event> allEvents = eventRepository.findAll();
+
+        return allEvents
+               .stream()
+               .map(event -> modelMapper.map(event, EventDtoResponse.class))
+               .collect(Collectors.toList());
+    }
+
     public EventDtoResponse addEvent(EventDto eventDto, MultipartFile eventPicture) {
         if (eventRepository.findEventByName(eventDto.getName()).isPresent()) {
             throw new DuplicateUniqueFieldException(EVENT_NAME_ALREADY_EXISTS);

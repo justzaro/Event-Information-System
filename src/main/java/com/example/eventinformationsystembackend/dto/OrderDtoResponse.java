@@ -3,6 +3,7 @@ package com.example.eventinformationsystembackend.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,11 +16,14 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OrderDtoResponse {
+    @NotNull
+    private String eventName;
+
     @NotBlank
     private Integer ticketsBought;
 
     @NotBlank
-    private String promoCode;
+    private String couponCode;
 
     @NotBlank
     private Double totalPrice;

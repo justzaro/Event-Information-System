@@ -17,7 +17,7 @@ import static java.lang.annotation.ElementType.FIELD;
 public @interface EnumValidatorConstraint {
     Class<? extends Enum<?>> enumClass();
 
-    String message() default " Invalid enum value!";
+    String message() default "Invalid enum value!";
 
     Class<?>[] groups() default {};
 

@@ -4,14 +4,17 @@ import com.example.eventinformationsystembackend.dto.OrderDto;
 import com.example.eventinformationsystembackend.dto.OrderDtoResponse;
 import com.example.eventinformationsystembackend.exception.NotEnoughSeatsException;
 import com.example.eventinformationsystembackend.exception.ResourceNotFoundException;
+import com.example.eventinformationsystembackend.model.Coupon;
 import com.example.eventinformationsystembackend.model.Event;
 import com.example.eventinformationsystembackend.model.Order;
 import com.example.eventinformationsystembackend.model.User;
+import com.example.eventinformationsystembackend.repository.CouponRepository;
 import com.example.eventinformationsystembackend.repository.EventRepository;
 import com.example.eventinformationsystembackend.repository.OrderRepository;
 import com.example.eventinformationsystembackend.repository.UserRepository;
 import org.aspectj.weaver.ast.Or;
 import org.modelmapper.ModelMapper;
+import org.springframework.aop.AopInvocationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,15 +29,18 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
+    private final CouponService couponService;
     private final ModelMapper modelMapper;
 
     @Autowired
     public OrderService(OrderRepository orderRepository,
                         UserRepository userRepository,
-                        EventRepository eventRepository) {
+                        EventRepository eventRepository,
+                        CouponService couponService) {
         this.orderRepository = orderRepository;
         this.userRepository = userRepository;
         this.eventRepository = eventRepository;
+        this.couponService = couponService;
         this.modelMapper = new ModelMapper();
     }
 
@@ -64,7 +70,17 @@ public class OrderService {
 
         Order orderToCreate = modelMapper.map(orderDto, Order.class);
 
-        orderToCreate.setTotalPrice(orderDto.getTicketsBought() * event.getTicketPrice());
+        double discount = 0;
+
+        if (orderDto.getCouponCode() != null) {
+            Coupon coupon = couponService.validateCoupon(orderDto.getCouponCode());
+            discount = coupon.getDiscountPercentage();
+            orderToCreate.setCoupon(coupon);
+        }
+
+        double totalPrice = calculateTotalPrice(orderDto, event, discount);
+
+        orderToCreate.setTotalPrice(totalPrice);
         orderToCreate.setDateOfOrder(LocalDateTime.now());
         orderToCreate.setUser(user);
         orderToCreate.setEvent(event);
@@ -74,11 +90,27 @@ public class OrderService {
         return modelMapper.map(newOrder, OrderDtoResponse.class);
     }
 
-    public boolean checkIfEventHasEnoughSeats(Event event, int orderedTickets) {
-        int ticketsBoughtForCurrentConcert = orderRepository.getTicketsBoughtForEvent(event.getId());
+    private boolean checkIfEventHasEnoughSeats(Event event, int orderedTickets) {
+        int ticketsBoughtForCurrentConcert;
+
+        //This exception is thrown if `getTicketsBoughtForEvent()` method returns null
+        //This happens if there are no orders for the specified concert
+        try {
+            ticketsBoughtForCurrentConcert = orderRepository.getTicketsBoughtForEvent(event.getId());
+        } catch (AopInvocationException e) {
+            return false;
+        }
+
         int eventCapacity = event.getCapacity();
         int availableTickets = eventCapacity - ticketsBoughtForCurrentConcert;
 
         return orderedTickets >= availableTickets;
+    }
+
+    private double calculateTotalPrice(OrderDto orderDto, Event event,
+                                       double discount) {
+        double priceWithoutDiscount = orderDto.getTicketsBought() * event.getTicketPrice();
+
+        return priceWithoutDiscount - (priceWithoutDiscount * (discount * 0.01));
     }
 }

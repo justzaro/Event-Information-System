@@ -1,5 +1,6 @@
 package com.example.eventinformationsystembackend.dto;
 
+import com.example.eventinformationsystembackend.model.Coupon;
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -20,5 +21,5 @@ public class OrderDto {
     private Integer ticketsBought;
 
     @Size(max = 255)
-    private String promoCode;
+    private String couponCode;
 }

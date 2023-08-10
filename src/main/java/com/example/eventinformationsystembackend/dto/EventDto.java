@@ -46,6 +46,7 @@ public class EventDto {
     private Boolean isActive;
 
     //doesn't throw error message
+    @NotNull(message = "Currency field must not be null!")
     //@EnumValidatorConstraint(enumClass = Currency.class, message = "Invalid currency type!")
     private Currency currency;
 
