@@ -43,10 +43,9 @@ public class EventController {
         return eventService.getAllEvents();
     }
 
-    @PostMapping(path = "/add", consumes = { MediaType.APPLICATION_JSON_VALUE,
-                                                MediaType.MULTIPART_FORM_DATA_VALUE })
-    public EventDtoResponse addEvent(@Valid @RequestPart EventDto eventDto,
-                                     @RequestPart("eventPicture") MultipartFile eventPicture) {
+    @PostMapping(path = "/add")
+    public EventDtoResponse addEvent(@RequestPart @Valid EventDto eventDto,
+                                     @RequestPart(value = "eventPicture") MultipartFile eventPicture) {
         return eventService.addEvent(eventDto, eventPicture);
     }
 

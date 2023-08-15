@@ -1,5 +1,6 @@
 package com.example.eventinformationsystembackend.service;
 
+import com.example.eventinformationsystembackend.exception.EmailAlreadyConfirmedException;
 import com.example.eventinformationsystembackend.exception.ResourceNotFoundException;
 import com.example.eventinformationsystembackend.model.ConfirmationToken;
 import com.example.eventinformationsystembackend.model.User;
@@ -29,10 +30,6 @@ public class ConfirmationTokenService {
         confirmationTokenRepository.save(token);
     }
 
-    public Optional<ConfirmationToken> getToken(String token) {
-        return confirmationTokenRepository.findConfirmationTokenByToken(token);
-    }
-
     public String createToken(User user) {
         String token = UUID.randomUUID().toString();
 
@@ -55,7 +52,7 @@ public class ConfirmationTokenService {
                         new ResourceNotFoundException(TOKEN_DOES_NOT_EXIST));
 
         if (confirmationToken.getConfirmedAt() != null) {
-            throw new IllegalStateException("email already confirmed");
+            throw new EmailAlreadyConfirmedException(EMAIL_ALREADY_CONFIRMED);
         }
 
         LocalDateTime expiredAt = confirmationToken.getExpiresAt();

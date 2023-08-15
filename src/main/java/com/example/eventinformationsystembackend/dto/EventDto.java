@@ -14,6 +14,7 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -53,5 +54,5 @@ public class EventDto {
     @DecimalMin(value = "1", message = "Minimal ticket price should be 1")
     private Double ticketPrice;
 
-    private List<ArtistDtoResponse> artists;
+    private Set<ArtistDtoResponse> artists;
 }

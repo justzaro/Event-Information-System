@@ -7,11 +7,10 @@ import com.example.eventinformationsystembackend.exception.DuplicateUniqueFieldE
 import com.example.eventinformationsystembackend.exception.ResourceNotFoundException;
 import com.example.eventinformationsystembackend.model.User;
 import com.example.eventinformationsystembackend.repository.UserRepository;
-import lombok.AllArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.modelmapper.ModelMapper;
-import org.springframework.ui.Model;
 import org.springframework.web.multipart.MultipartFile;
 
 import static com.example.eventinformationsystembackend.common.ExceptionMessages.*;
@@ -19,7 +18,7 @@ import static com.example.eventinformationsystembackend.common.FilePaths.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.module.ResolutionException;
+
 import java.nio.file.Files;
 
 @Service
@@ -69,13 +68,17 @@ public class UserService {
         userToRegister.setUserRole(UserRole.USER);
         userToRegister.setIsEnabled(false);
         userToRegister.setIsLocked(false);
-        userToRegister.setProfilePicturePath(userProfilePicturePath);
+        userToRegister.setProfilePicturePath(null);
+        userToRegister.setProfilePictureName(null);
+
 
         storageService.createFolder(userFolderPath);
         storageService.createFolder(userPostsFolderPath);
 
         if (profilePicture != null) {
             if (!profilePicture.isEmpty()) {
+                userToRegister.setProfilePicturePath(userProfilePicturePath);
+                userToRegister.setProfilePictureName(profilePicture.getOriginalFilename());
                 storageService.savePictureToFileSystem(profilePicture, userProfilePicturePath);
             }
         }
@@ -97,8 +100,18 @@ public class UserService {
         User user = userRepository.findUserByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException(USER_DOES_NOT_EXIST));
 
+        String currentUserFolderPath = USERS_FOLDER_PATH + user.getUsername();
+        String newUserFolderPath = USERS_FOLDER_PATH + user.getUsername();
+
         if (!user.getUsername().equals(userDto.getUsername())) {
             checkForDuplicateUsername(userDto.getUsername());
+            newUserFolderPath = USERS_FOLDER_PATH + userDto.getUsername();
+            storageService.renameFolder(currentUserFolderPath, newUserFolderPath);
+
+            if (user.getProfilePicturePath() != null) {
+                String newUserProfilePicturePath = newUserFolderPath + "\\" + user.getProfilePictureName();
+                user.setProfilePicturePath(newUserProfilePicturePath);
+            }
         }
 
         if (!user.getEmail().equals(userDto.getEmail())) {
@@ -111,8 +124,18 @@ public class UserService {
             }
         }
 
-        String userFolderPath = USERS_FOLDER_PATH + user.getUsername();
-        String renamedUserFolderPath = USERS_FOLDER_PATH + userDto.getUsername();
+        if (profilePicture != null && !profilePicture.isEmpty()) {
+            if (user.getProfilePicturePath() != null) {
+                storageService.deleteFile(user.getProfilePicturePath());
+            }
+
+            String newUserProfilePicturePath = newUserFolderPath + "\\"
+                    + profilePicture.getOriginalFilename();
+
+            storageService.savePictureToFileSystem(profilePicture, newUserProfilePicturePath);
+
+            user.setProfilePicturePath(newUserProfilePicturePath);
+        }
 
         user.setFirstName(userDto.getFirstName());
         user.setLastName(userDto.getLastName());
@@ -123,19 +146,6 @@ public class UserService {
         user.setDateOfBirth(userDto.getDateOfBirth());
         user.setAddress(userDto.getAddress());
         user.setDescription(userDto.getDescription());
-
-        storageService.renameFolder(userFolderPath, renamedUserFolderPath);
-
-        if (profilePicture != null) {
-            if (!profilePicture.isEmpty()) {
-                String userProfilePicturePath = renamedUserFolderPath + "\\"
-                        + profilePicture.getOriginalFilename();
-
-                storageService.savePictureToFileSystem(profilePicture, userProfilePicturePath);
-
-                user.setProfilePicturePath(userProfilePicturePath);
-            }
-        }
 
         User updatedUser = userRepository.save(user);
 

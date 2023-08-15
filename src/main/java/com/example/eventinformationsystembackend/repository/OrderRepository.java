@@ -3,6 +3,7 @@ package com.example.eventinformationsystembackend.repository;
 import com.example.eventinformationsystembackend.model.Event;
 import com.example.eventinformationsystembackend.model.Order;
 import com.example.eventinformationsystembackend.model.User;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,4 +18,5 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     int getTicketsBoughtForEvent(@Param("eventId") Long eventId);
 
     List<Order> findAllByUser(User user);
+    List<Order> findAllByEvent(Event event);
 }

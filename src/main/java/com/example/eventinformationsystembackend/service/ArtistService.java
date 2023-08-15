@@ -64,9 +64,4 @@ public class ArtistService {
         return modelMapper.map(artistRepository.save(artistToAdd), ArtistDtoResponse.class);
 
     }
-
-    private void uploadEventPictureToFileSystem(MultipartFile profilePicture,
-                                                String path) throws IOException {
-        profilePicture.transferTo(new File(path));
-    }
 }

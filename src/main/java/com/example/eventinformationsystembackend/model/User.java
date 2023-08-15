@@ -49,7 +49,7 @@ public class User {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "profile_picture_path", nullable = false)
+    @Column(name = "profile_picture_path")
     private String profilePicturePath;
 
     @Column(name = "user_role")
@@ -61,6 +61,9 @@ public class User {
 
     @Column(name = "is_enabled", nullable = false, columnDefinition = "TINYINT(1) DEFAULT FALSE")
     private Boolean isEnabled;
+
+    @Column(name = "profile_picture_name", columnDefinition = "TEXT")
+    private String profilePictureName;
 
     @OneToMany(mappedBy = "user")
     private List<Order> orders;

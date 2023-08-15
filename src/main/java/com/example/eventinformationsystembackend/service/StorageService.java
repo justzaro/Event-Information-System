@@ -39,9 +39,7 @@ public class StorageService {
         try {
             Files.move(currentFolder, renamedFolder);
         } catch (FileAlreadyExistsException e) {
-            System.out.println("FILE");
         } catch (IOException e) {
-            System.out.println("IO");
         }
     }
 

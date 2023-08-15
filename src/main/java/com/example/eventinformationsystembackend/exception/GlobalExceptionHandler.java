@@ -60,7 +60,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({InvalidEventDateException.class,
                        CouponHasExpiredException.class,
-                       CouponHasBeenUsedException.class})
+                       CouponHasBeenUsedException.class,
+                       EmailAlreadyConfirmedException.class})
     public ResponseEntity<ErrorResponse> handleInvalidEventDateException(Exception e) {
         ErrorResponse errorResponse = new ErrorResponse();
 

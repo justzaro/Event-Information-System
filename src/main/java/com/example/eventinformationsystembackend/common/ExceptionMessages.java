@@ -12,6 +12,7 @@ public class ExceptionMessages {
 
     public static final String TOKEN_HAS_EXPIRED = "Token has expired!";
     public static final String NOT_ENOUGH_SEATS = "Not enough seats for this concert";
+    public static final String EMAIL_ALREADY_CONFIRMED = "Email is already confirmed";
 
     public static final String USERNAME_ALREADY_EXISTS = "Desired username is already taken!";
     public static final String EMAIL_ALREADY_EXISTS = "Desired email is already taken!";
