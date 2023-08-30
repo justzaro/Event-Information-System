@@ -5,6 +5,7 @@ import com.example.eventinformationsystembackend.dto.OrderItemDtoResponse;
 import com.example.eventinformationsystembackend.dto.TicketDtoResponse;
 import com.example.eventinformationsystembackend.model.User;
 import jakarta.mail.MessagingException;
+import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
