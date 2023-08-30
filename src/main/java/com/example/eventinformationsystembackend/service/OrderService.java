@@ -1,15 +1,12 @@
 package com.example.eventinformationsystembackend.service;
 
-import com.example.eventinformationsystembackend.dto.OrderDto;
-import com.example.eventinformationsystembackend.dto.OrderDtoResponse;
+import com.example.eventinformationsystembackend.dto.*;
+import com.example.eventinformationsystembackend.exception.EmptyCartException;
 import com.example.eventinformationsystembackend.exception.NotEnoughSeatsException;
 import com.example.eventinformationsystembackend.exception.ResourceNotFoundException;
-import com.example.eventinformationsystembackend.model.Coupon;
-import com.example.eventinformationsystembackend.model.Event;
-import com.example.eventinformationsystembackend.model.Order;
-import com.example.eventinformationsystembackend.model.User;
-import com.example.eventinformationsystembackend.repository.CouponRepository;
+import com.example.eventinformationsystembackend.model.*;
 import com.example.eventinformationsystembackend.repository.EventRepository;
+import com.example.eventinformationsystembackend.repository.OrderItemRepository;
 import com.example.eventinformationsystembackend.repository.OrderRepository;
 import com.example.eventinformationsystembackend.repository.UserRepository;
 import org.aspectj.weaver.ast.Or;
@@ -18,7 +15,9 @@ import org.springframework.aop.AopInvocationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,17 +29,35 @@ public class OrderService {
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
     private final CouponService couponService;
+    private final CartItemService cartItemService;
+    private final EventService eventService;
+    private final TicketService ticketService;
+    private final GenerationService generationService;
+    private final OrderItemService orderItemService;
+    private final OrderItemRepository orderItemRepository;
     private final ModelMapper modelMapper;
 
     @Autowired
     public OrderService(OrderRepository orderRepository,
                         UserRepository userRepository,
                         EventRepository eventRepository,
-                        CouponService couponService) {
+                        CouponService couponService,
+                        CartItemService cartItemService,
+                        EventService eventService,
+                        TicketService ticketService,
+                        GenerationService generationService,
+                        OrderItemService orderItemService,
+                        OrderItemRepository orderItemRepository) {
         this.orderRepository = orderRepository;
         this.userRepository = userRepository;
         this.eventRepository = eventRepository;
         this.couponService = couponService;
+        this.cartItemService = cartItemService;
+        this.eventService = eventService;
+        this.ticketService = ticketService;
+        this.generationService = generationService;
+        this.orderItemRepository = orderItemRepository;
+        this.orderItemService = orderItemService;
         this.modelMapper = new ModelMapper();
     }
 
@@ -56,61 +73,93 @@ public class OrderService {
                .collect(Collectors.toList());
     }
 
-    public OrderDtoResponse createOrder(String username, Long eventId,
-                            OrderDto orderDto) {
+/*    private Double getCartItemsTotalPriceWithoutCoupon(String username) {
+        List<CartItemDtoResponse> cartItems =
+                cartItemService.getAllCartItemsForUser(username);
+
+        double totalPrice = 0;
+
+        for (CartItemDtoResponse cartItem : cartItems) {
+            totalPrice += cartItem.getTotalPrice();
+        }
+        System.out.println(totalPrice);
+        return totalPrice;
+    }*/
+
+/*    public Double getCartItemsTotalPriceWithCoupon(String username, String couponCode) {
+        if (userRepository.findUserByUsername(username).isEmpty()) {
+            throw new ResourceNotFoundException(USER_DOES_NOT_EXIST);
+        }
+        Coupon coupon = couponService.validateCoupon(couponCode);
+
+        double totalPrice = getCartItemsTotalPriceWithoutCoupon(username);
+        double discount = coupon.getDiscountPercentage() / 100;
+        double priceWithDiscount = totalPrice - (totalPrice * discount);
+
+        return priceWithDiscount;
+    }*/
+
+    public void createOrder(String username, String couponCode) {
+
+        List<CartItemDtoResponse> cartItems =
+                cartItemService.getAllCartItemsForUser(username);
+
         User user = userRepository.findUserByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException(USER_DOES_NOT_EXIST));
 
-        Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new ResourceNotFoundException(EVENT_DOES_NOT_EXIST));
-
-        if (checkIfEventHasEnoughSeats(event, orderDto.getTicketsBought())) {
-            throw new NotEnoughSeatsException(NOT_ENOUGH_SEATS);
+        if (cartItems.isEmpty()) {
+            throw new EmptyCartException(EMPTY_CART);
         }
 
-        Order orderToCreate = modelMapper.map(orderDto, Order.class);
+        int totalTicketQuantity = 0;
+        double totalPrice = 0;
 
-        double discount = 0;
+        for (CartItemDtoResponse cartItem : cartItems) {
+            Event cartItemEvent = eventRepository.findEventByName(cartItem.getEventName())
+                    .orElseThrow(() -> new ResourceNotFoundException(EVENT_DOES_NOT_EXIST));
 
-        if (orderDto.getCouponCode() != null) {
-            Coupon coupon = couponService.validateCoupon(orderDto.getCouponCode());
-            discount = coupon.getDiscountPercentage();
-            orderToCreate.setCoupon(coupon);
+            if (!eventService.checkIfEventHasEnoughSeats(cartItemEvent, cartItem.getTicketQuantity())) {
+                throw new NotEnoughSeatsException(NOT_ENOUGH_SEATS);
+            }
+
+            totalTicketQuantity += cartItem.getTicketQuantity();
+            totalPrice += cartItem.getTotalPrice();
         }
 
-        double totalPrice = calculateTotalPrice(orderDto, event, discount);
+        Coupon coupon = null;
 
-        orderToCreate.setTotalPrice(totalPrice);
-        orderToCreate.setDateOfOrder(LocalDateTime.now());
-        orderToCreate.setUser(user);
-        orderToCreate.setEvent(event);
+        if (couponCode != null) {
+            coupon = couponService.validateCoupon(couponCode);
+            totalPrice = calculateTotalPriceWithDiscount(totalPrice, coupon);
+            couponService.setCouponAsUsed(coupon);
+        }
 
-        Order newOrder = orderRepository.save(orderToCreate);
+        Order order = new Order();
 
-        return modelMapper.map(newOrder, OrderDtoResponse.class);
-    }
+        order.setUser(user);
+        order.setDateOfOrder(LocalDateTime.now());
+        order.setCoupon(coupon);
+        order.setTicketsBought(totalTicketQuantity);
+        order.setTotalPrice(totalPrice);
+        order.setOrderItems(new ArrayList<>());
 
-    private boolean checkIfEventHasEnoughSeats(Event event, int orderedTickets) {
-        int ticketsBoughtForCurrentConcert;
+        Order createdOrder = orderRepository.save(order);
 
-        //This exception is thrown if `getTicketsBoughtForEvent()` method returns null
-        //This happens if there are no orders for the specified concert
+        ticketService.createTickets(cartItemService.getAllCartItemsForUser(user), createdOrder);
+
+        cartItemService.removeAllCartItemsForUser(user);
+
         try {
-            ticketsBoughtForCurrentConcert = orderRepository.getTicketsBoughtForEvent(event.getId());
-        } catch (AopInvocationException e) {
-            return false;
+            generationService.generateOrderReceivedEmailTemplate(createdOrder, user);
+            generationService.generateOrderedTicketsEmailTemplate(createdOrder, user);
+        } catch (IOException e) {
+
         }
 
-        int eventCapacity = event.getCapacity();
-        int availableTickets = eventCapacity - ticketsBoughtForCurrentConcert;
-
-        return orderedTickets >= availableTickets;
     }
+    public Double calculateTotalPriceWithDiscount(double totalPrice, Coupon coupon) {
+        double discountPercentage = coupon.getDiscountPercentage() / 100;
 
-    private double calculateTotalPrice(OrderDto orderDto, Event event,
-                                       double discount) {
-        double priceWithoutDiscount = orderDto.getTicketsBought() * event.getTicketPrice();
-
-        return priceWithoutDiscount - (priceWithoutDiscount * (discount * 0.01));
+        return totalPrice - (totalPrice * discountPercentage);
     }
 }

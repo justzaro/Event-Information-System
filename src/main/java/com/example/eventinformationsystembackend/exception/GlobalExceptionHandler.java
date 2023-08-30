@@ -1,6 +1,6 @@
 package com.example.eventinformationsystembackend.exception;
 
-import com.example.eventinformationsystembackend.annotation.EnumValidatorConstraint;
+import com.example.eventinformationsystembackend.model.CartItem;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -58,10 +58,14 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
     }
 
-    @ExceptionHandler({InvalidEventDateException.class,
-                       CouponHasExpiredException.class,
-                       CouponHasBeenUsedException.class,
-                       EmailAlreadyConfirmedException.class})
+    @ExceptionHandler({
+            InvalidEventDateException.class,
+            CouponHasExpiredException.class,
+            CouponHasBeenUsedException.class,
+            EmailAlreadyConfirmedException.class,
+            EmptyCartException.class,
+            CartItemTicketsExceedEventCapacity.class
+    })
     public ResponseEntity<ErrorResponse> handleInvalidEventDateException(Exception e) {
         ErrorResponse errorResponse = new ErrorResponse();
 

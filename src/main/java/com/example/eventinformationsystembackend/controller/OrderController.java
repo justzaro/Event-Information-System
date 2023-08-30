@@ -2,8 +2,12 @@ package com.example.eventinformationsystembackend.controller;
 
 import com.example.eventinformationsystembackend.dto.OrderDto;
 import com.example.eventinformationsystembackend.dto.OrderDtoResponse;
+import com.example.eventinformationsystembackend.dto.OrderItemDtoResponse;
+import com.example.eventinformationsystembackend.model.OrderItem;
+import com.example.eventinformationsystembackend.service.OrderItemService;
 import com.example.eventinformationsystembackend.service.OrderService;
 import jakarta.validation.Valid;
+import jakarta.websocket.server.PathParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,10 +18,13 @@ import java.util.List;
 @RequestMapping(path = "/orders")
 public class OrderController {
     private final OrderService orderService;
+    private final OrderItemService orderItemService;
 
     @Autowired
-    public OrderController(OrderService orderService) {
+    public OrderController(OrderService orderService,
+                           OrderItemService orderItemService) {
         this.orderService = orderService;
+        this.orderItemService = orderItemService;
     }
 
     @GetMapping(path = "/{username}")
@@ -25,10 +32,15 @@ public class OrderController {
         return orderService.getAllOrdersForUsers(username);
     }
 
-    @PostMapping(path = "/create/{username}/{eventId}")
-    public OrderDtoResponse createOrder(@PathVariable("username") String username,
-                                        @PathVariable("eventId") Long eventId,
-                                        @RequestBody @Valid OrderDto orderDto) {
-        return orderService.createOrder(username, eventId, orderDto);
+    @PostMapping(path = "/create/{username}")
+    public void createOrder(@PathVariable("username") String username,
+                            @PathParam("couponCode") String couponCode) {
+        orderService.createOrder(username, couponCode);
+    }
+
+    //test
+    @GetMapping(path = "/order-items/{orderId}")
+    public List<OrderItemDtoResponse> getOrderItems(@PathVariable("orderId") Long id) {
+        return orderItemService.getOrderItems(id);
     }
 }

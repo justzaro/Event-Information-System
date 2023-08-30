@@ -5,14 +5,19 @@ public class ExceptionMessages {
     public static final String EVENT_DOES_NOT_EXIST = "Such event does not exist!";
     public static final String TOKEN_DOES_NOT_EXIST = "Such token does not exist!";
     public static final String POST_DOES_NOT_EXIST = "Such post does not exist!";
+    public static final String CART_ITEM_DOES_NOT_EXIST = "Cart item with this ID does not exist!";
 
     public static final String COUPON_IS_INVALID = "Invalid coupon code!";
     public static final String COUPON_HAS_EXPIRED = "Coupon code has expired!";
     public static final String COUPON_HAS_BEEN_USED = "Coupon has already been used!";
 
+
     public static final String TOKEN_HAS_EXPIRED = "Token has expired!";
     public static final String NOT_ENOUGH_SEATS = "Not enough seats for this concert";
     public static final String EMAIL_ALREADY_CONFIRMED = "Email is already confirmed";
+    public static final String EMPTY_CART = "You must add items to your cart before you make an order!";
+    public static final String CART_ITEM_TICKETS_EXCEED_EVENT_CAPACITY = "You must add items to your cart before you make an order!";
+
 
     public static final String USERNAME_ALREADY_EXISTS = "Desired username is already taken!";
     public static final String EMAIL_ALREADY_EXISTS = "Desired email is already taken!";

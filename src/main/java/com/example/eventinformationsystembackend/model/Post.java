@@ -21,6 +21,10 @@ public class Post {
     @Column(name = "post_id")
     private Long id;
 
+    //todo maybe add title field
+/*    @Column(name = "title")
+    private String title;*/
+
     @Column(name = "description")
     private String description;
 

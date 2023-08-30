@@ -34,6 +34,9 @@ public class Event {
     @Column(name = "location", nullable = false)
     private String location;
 
+    @Column(name = "event_picture_name", nullable = false)
+    private String eventPictureName;
+
     @Column(name = "start_date", nullable = false)
     private LocalDateTime startDate;
 
@@ -56,8 +59,8 @@ public class Event {
     @Column(name = "is_active", nullable = false)
     private Boolean isActive;
 
-    @OneToMany(mappedBy = "event", cascade = CascadeType.REMOVE)
-    private List<Order> orders;
+/*    @OneToMany(mappedBy = "event", cascade = CascadeType.REMOVE)
+    private List<Order> orders;*/
 
     @ManyToMany()
     @JoinTable(
@@ -66,4 +69,10 @@ public class Event {
             inverseJoinColumns = @JoinColumn(name = "artist_id")
     )
     private Set<Artist> artists;
+
+    @OneToMany(mappedBy = "event")
+    private List<CartItem> cartItems;
+
+    @OneToMany(mappedBy = "event")
+    private List<Ticket> tickets;
 }

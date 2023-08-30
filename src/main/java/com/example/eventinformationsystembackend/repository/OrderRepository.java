@@ -13,10 +13,13 @@ import java.util.List;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
-    @Query(value = "SELECT SUM(tickets_bought) FROM orders WHERE event_id = :eventId",
+/*    @Query(value = "SELECT SUM(tickets_bought) FROM orders WHERE event_id = :eventId",
+           nativeQuery = true)
+    int getTicketsBoughtForEvent(@Param("eventId") Long eventId);*/
+
+        @Query(value = "SELECT COUNT(ticket_id) FROM tickets WHERE event_id = :eventId",
            nativeQuery = true)
     int getTicketsBoughtForEvent(@Param("eventId") Long eventId);
 
     List<Order> findAllByUser(User user);
-    List<Order> findAllByEvent(Event event);
 }
