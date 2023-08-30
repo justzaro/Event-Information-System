@@ -6,6 +6,7 @@ import com.example.eventinformationsystembackend.exception.CouponHasBeenUsedExce
 import com.example.eventinformationsystembackend.exception.CouponHasExpiredException;
 import com.example.eventinformationsystembackend.exception.ResourceNotFoundException;
 import com.example.eventinformationsystembackend.model.Coupon;
+import com.example.eventinformationsystembackend.model.User;
 import com.example.eventinformationsystembackend.repository.CouponRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,12 +22,16 @@ import static com.example.eventinformationsystembackend.common.ExceptionMessages
 @Service
 public class CouponService {
     private final CouponRepository couponRepository;
+    private final GenerationService generationService;
 
     @Autowired
-    public CouponService(CouponRepository couponRepository) {
+    public CouponService(CouponRepository couponRepository,
+                         GenerationService generationService) {
         this.couponRepository = couponRepository;
+        this.generationService = generationService;
     }
 
+    //todo maybe pass total price here and return the result
     public Coupon validateCoupon(String couponCode) {
          Coupon coupon = couponRepository.findCouponByCouponCode(couponCode)
                  .orElseThrow(() -> new ResourceNotFoundException(COUPON_IS_INVALID));
@@ -39,14 +44,15 @@ public class CouponService {
              throw new CouponHasBeenUsedException(COUPON_HAS_BEEN_USED);
          }
 
-         couponRepository.updateIsUsedColumnToTrue(coupon.getCouponId());
-
          return coupon;
     }
 
     public void generateSingleUseCoupons(CouponDto couponDto) {
         List<String> generatedCouponCodes =
-                generateCouponCodes(couponDto.getCouponsToBeGenerated());
+                generationService.generateCodes(
+                        couponDto.getCouponsToBeGenerated(),
+                        SINGLE_USE_COUPONS_CODE_LENGTH,
+                        SINGLE_USE_COUPONS_ALPHABET);
 
         for (String generatedCouponCode : generatedCouponCodes) {
             Coupon coupon = new Coupon();
@@ -62,9 +68,20 @@ public class CouponService {
         }
     }
 
-    public void generateMultiUseCoupons(CouponDto couponDto) {
-        List<String> generatedCouponCodes =
-                generateCouponCodes(couponDto.getCouponsToBeGenerated());
+    public void setCouponAsUsed(Coupon coupon) {
+        if (couponRepository.findCouponByCouponCode(coupon.getCouponCode()).isEmpty()) {
+            throw new ResourceNotFoundException(COUPON_IS_INVALID);
+        }
+
+        coupon.setIsUsed(true);
+        couponRepository.save(coupon);
+    }
+
+/*    public void generateMultiUseCoupons(CouponDto couponDto) {
+        generationService.generateCodes(
+                couponDto.getCouponsToBeGenerated(),
+                SINGLE_USE_COUPONS_CODE_LENGTH,
+                SINGLE_USE_COUPONS_ALPHABET);
 
         for (String generatedCouponCode : generatedCouponCodes) {
             Coupon coupon = new Coupon();
@@ -78,30 +95,5 @@ public class CouponService {
 
             couponRepository.save(coupon);
         }
-    }
-
-    private List<String> generateCouponCodes(int couponToBeGenerated) {
-        final String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmopqrstuvwxyz0123456789";
-        Random random = new Random();
-
-        List<String> generatedCouponCodes = new ArrayList<>();
-
-        int couponCodeLength = 10;
-
-        for (int i = 0; i < couponToBeGenerated; i++) {
-            StringBuilder sb = new StringBuilder();
-
-            for (int j = 0; j < couponCodeLength; j++) {
-
-                int index = random.nextInt(alphabet.length());
-                char randomChar = alphabet.charAt(index);
-                sb.append(randomChar);
-            }
-
-            String generatedString = sb.toString();
-            generatedCouponCodes.add(generatedString);
-        }
-
-        return generatedCouponCodes;
-    }
+    }*/
 }

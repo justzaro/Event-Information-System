@@ -8,14 +8,14 @@ import com.example.eventinformationsystembackend.dto.EventDtoResponse;
 import com.example.eventinformationsystembackend.exception.DuplicateUniqueFieldException;
 import com.example.eventinformationsystembackend.exception.InvalidEventDateException;
 import com.example.eventinformationsystembackend.exception.ResourceNotFoundException;
-import com.example.eventinformationsystembackend.model.Artist;
-import com.example.eventinformationsystembackend.model.Event;
-import com.example.eventinformationsystembackend.model.Order;
-import com.example.eventinformationsystembackend.model.User;
+import com.example.eventinformationsystembackend.model.*;
 import com.example.eventinformationsystembackend.repository.EventRepository;
 import com.example.eventinformationsystembackend.repository.OrderRepository;
 import lombok.AllArgsConstructor;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.modelmapper.ModelMapper;
+import org.springframework.aop.AopInvocationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,15 +35,18 @@ public class EventService {
     private final EventRepository eventRepository;
     private final OrderRepository orderRepository;
     private final StorageService storageService;
+    private final ImageService imageService;
     private final ModelMapper modelMapper;
 
     @Autowired
     public EventService(EventRepository eventRepository,
                         OrderRepository orderRepository,
-                        StorageService storageService) {
+                        StorageService storageService,
+                        ImageService imageService) {
         this.eventRepository = eventRepository;
         this.orderRepository = orderRepository;
         this.storageService = storageService;
+        this.imageService = imageService;
         this.modelMapper = new ModelMapper();
     }
 
@@ -87,6 +90,10 @@ public class EventService {
 
         String eventFolderPath = EVENTS_FOLDER_PATH + eventToAdd.getName();
         String eventPicturePath = eventFolderPath + "\\" + eventPicture.getOriginalFilename();
+        String resizedEventPicturePath = eventFolderPath + "\\resized.jpg";
+
+        String imageExtension = FilenameUtils.getExtension(eventPicture.getOriginalFilename());
+        System.out.println(imageExtension);
 
         if (eventDto.getCurrency() == null) {
             eventToAdd.setCurrency(Currency.BGN);
@@ -94,11 +101,13 @@ public class EventService {
 
         eventToAdd.setEventPicturePath(eventPicturePath);
         eventToAdd.setIsActive(true);
+        eventToAdd.setEventPictureName(eventPicture.getOriginalFilename());
 
         eventRepository.save(eventToAdd);
 
         storageService.createFolder(eventFolderPath);
         storageService.savePictureToFileSystem(eventPicture, eventPicturePath);
+        imageService.createResizedImage(eventPicturePath, resizedEventPicturePath, imageExtension);
 
         return modelMapper.map(eventToAdd, EventDtoResponse.class);
     }
@@ -117,28 +126,28 @@ public class EventService {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new ResourceNotFoundException(EVENT_DOES_NOT_EXIST));
 
+        String oldEventFolderPath = EVENTS_FOLDER_PATH + event.getName();
+        String newEventFolderPath = EVENTS_FOLDER_PATH + event.getName();
+
         if (!event.getName().equals(eventDto.getName())) {
             if (eventRepository.findEventByName(eventDto.getName()).isPresent()) {
                 throw new DuplicateUniqueFieldException(EVENT_NAME_ALREADY_EXISTS);
             }
+            newEventFolderPath = EVENTS_FOLDER_PATH + eventDto.getName();
+            storageService.renameFolder(oldEventFolderPath, newEventFolderPath);
+
+            if (event.getEventPicturePath() != null) {
+                String newEventPicturePath = newEventFolderPath + "\\" + event.getEventPictureName();
+                event.setEventPicturePath(newEventPicturePath);
+            }
         }
-
-        String oldEventFolderPath = EVENTS_FOLDER_PATH + event.getName();
-        String newEventFolderPath = EVENTS_FOLDER_PATH + eventDto.getName();
-
-        storageService.deleteFile(event.getEventPicturePath());
-        storageService.renameFolder(oldEventFolderPath, newEventFolderPath);
 
         if (eventPicture != null) {
             if (!eventPicture.isEmpty()) {
                 String newEventPicturePath = newEventFolderPath + "\\" + eventPicture.getOriginalFilename();
                 storageService.savePictureToFileSystem(eventPicture, newEventPicturePath);
                 event.setEventPicturePath(newEventPicturePath);
-            } else {
-                System.out.println("empty");
             }
-        } else {
-            System.out.println("null");
         }
 
         event.setName(eventDto.getName());
@@ -153,8 +162,13 @@ public class EventService {
         Set<Artist> artists = eventDto.getArtists()
                 .stream()
                 .map(artistDtoResponse -> modelMapper.map(artistDtoResponse, Artist.class)).collect(Collectors.toSet());
+        //todo add exception if eventDto.getArtists() is empty
+        if (eventDto.getArtists().isEmpty()) {
+            event.setArtists(null);
+        } else {
+            event.getArtists().addAll(artists);
+        }
 
-        event.getArtists().addAll(artists);
         eventRepository.save(event);
 
         return modelMapper.map(event, EventDtoResponse.class);
@@ -170,4 +184,25 @@ public class EventService {
 
         eventRepository.delete(event);
     }
+
+    public boolean checkIfEventHasEnoughSeats(Event event, int ticketQuantity) {
+        int ticketsBoughtForCurrentConcert;
+
+        //This exception is thrown if `getTicketsBoughtForEvent()` method returns null
+        //This happens if there are no orders for the specified concert
+        try {
+            ticketsBoughtForCurrentConcert = orderRepository.getTicketsBoughtForEvent(event.getId());
+        } catch (AopInvocationException e) {
+            System.out.println("asd");
+            return ticketQuantity <= event.getCapacity();
+        }
+
+        int eventCapacity = event.getCapacity();
+        int availableTickets = eventCapacity - ticketsBoughtForCurrentConcert;
+        System.out.println(eventCapacity);
+        System.out.println(availableTickets);
+        System.out.println(ticketQuantity);
+        return ticketQuantity <= eventCapacity && ticketQuantity <= availableTickets;
+    }
+
 }
