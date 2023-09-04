@@ -35,12 +35,15 @@ public class GenerationService {
 
     private final OrderItemService orderItemService;
     private final EmailService emailService;
+    private final StorageService storageService;
 
     @Autowired
     public GenerationService(OrderItemService orderItemService,
-                             EmailService emailService) {
+                             EmailService emailService,
+                             StorageService storageService) {
         this.orderItemService = orderItemService;
         this.emailService = emailService;
+        this.storageService = storageService;
     }
 
     public List<String> generateCodes(int codesQuantity,
@@ -164,12 +167,13 @@ public class GenerationService {
     }
 
     public void generateOrderedTicketsEmailTemplate(Order order, User user) {
+        String currentTicketPdfFilePath;
+
+        List<String> ticketsPdfFilePaths = new ArrayList<>();
+        List<TicketDtoResponse> ticketsForCurrentOrder = new ArrayList<>();
+
         List<OrderItemDtoResponse> orderItems = orderItemService.getOrderItems(order.getId());
         List<TicketDtoResponse> ticketsForOrderItem = new ArrayList<>();
-
-        String currentTicketPdfFilePath;
-        List<String> ticketFilePaths = new ArrayList<>();
-        List<TicketDtoResponse> tickets = new ArrayList<>();
 
         for (OrderItemDtoResponse orderItem : orderItems) {
             ticketsForOrderItem.addAll(orderItem.getTickets());
@@ -180,18 +184,27 @@ public class GenerationService {
 
                 try {
                     currentTicketPdfFilePath = createPdfFileFromHtmlFile(htmlFilePath);
-                    ticketFilePaths.add(currentTicketPdfFilePath);
-                    tickets.add(ticket);
+                    ticketsPdfFilePaths.add(currentTicketPdfFilePath);
+                    ticketsForCurrentOrder.add(ticket);
                 } catch (IOException e) {
 
                 }
+
+                //Deletes the .html file created for the current ticket
+                storageService.deleteFolder(htmlFilePath);
             }
             ticketsForOrderItem.clear();
         }
 
         String formattedText = String.format(TICKETS_RECEIVED_EMAIL_TEMPLATE, user.getFirstName());
 
-        emailService.sendTicketsEmail(user, formattedText, ticketFilePaths, tickets);
+        emailService.sendTicketsEmail(user, formattedText, ticketsPdfFilePaths, ticketsForCurrentOrder);
+
+        //Deletes the .pdf files and QR Code .png images created for the current order
+        for (int i = 0; i < ticketsPdfFilePaths.size(); i++) {
+            storageService.deleteFile(ticketsPdfFilePaths.get(i));
+            storageService.deleteFile(ticketsForCurrentOrder.get(i).getQrCodeImagePath());
+        }
     }
 
     private String createHtmlFileForTicket(TicketDtoResponse ticket, EventDtoResponse event, User user) {

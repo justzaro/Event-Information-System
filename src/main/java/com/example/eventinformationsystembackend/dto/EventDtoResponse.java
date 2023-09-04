@@ -31,10 +31,10 @@ public class EventDtoResponse {
     @NotBlank
     private String location;
 
-    @JsonFormat(pattern = "HH:mm dd-MM-yyyy")
+    @JsonFormat(pattern = "HH:mm dd/MM/yyyy")
     private LocalDateTime startDate;
 
-    @JsonFormat(pattern = "HH:mm dd-MM-yyyy")
+    @JsonFormat(pattern = "HH:mm dd/MM/yyyy")
     private LocalDateTime endDate;
 
     @NotNull

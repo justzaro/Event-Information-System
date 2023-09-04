@@ -2,6 +2,7 @@ package com.example.eventinformationsystembackend.service;
 
 import com.example.eventinformationsystembackend.dto.PostDto;
 import com.example.eventinformationsystembackend.dto.PostDtoResponse;
+import com.example.eventinformationsystembackend.exception.PostDoesNotContainImageException;
 import com.example.eventinformationsystembackend.exception.ResourceNotFoundException;
 import com.example.eventinformationsystembackend.model.Post;
 import com.example.eventinformationsystembackend.model.User;
@@ -14,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -52,6 +54,11 @@ public class PostService {
         User user = userRepository.findUserByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException(USER_DOES_NOT_EXIST));
 
+        //Maybe remove the exception if posts can be text-only
+        if (postPicture.isEmpty()) {
+            throw new PostDoesNotContainImageException(POST_DOES_NOT_CONTAIN_IMAGE);
+        }
+
         Post postToAdd = modelMapper.map(postDto, Post.class);
 
         String postPicturePath = USERS_FOLDER_PATH + user.getUsername() + "\\Posts\\"
@@ -71,5 +78,12 @@ public class PostService {
                 .orElseThrow(() -> new ResourceNotFoundException(POST_DOES_NOT_EXIST));
 
         postRepository.delete(post);
+    }
+
+    public byte[] getPostPicture(Long postId) throws IOException {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException(POST_DOES_NOT_EXIST));
+        String postPicturePath = post.getPostPicturePath();
+        return Files.readAllBytes(new File(postPicturePath).toPath());
     }
 }

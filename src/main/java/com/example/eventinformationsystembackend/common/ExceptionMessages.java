@@ -11,6 +11,7 @@ public class ExceptionMessages {
     public static final String COUPON_HAS_EXPIRED = "Coupon code has expired!";
     public static final String COUPON_HAS_BEEN_USED = "Coupon has already been used!";
 
+    public static final String POST_DOES_NOT_CONTAIN_IMAGE = "You must add an image to your post before you upload it!";
 
     public static final String TOKEN_HAS_EXPIRED = "Token has expired!";
     public static final String NOT_ENOUGH_SEATS = "Not enough seats for this concert";

@@ -64,7 +64,8 @@ public class GlobalExceptionHandler {
             CouponHasBeenUsedException.class,
             EmailAlreadyConfirmedException.class,
             EmptyCartException.class,
-            CartItemTicketsExceedEventCapacity.class
+            CartItemTicketsExceedEventCapacity.class,
+            PostDoesNotContainImageException.class
     })
     public ResponseEntity<ErrorResponse> handleInvalidEventDateException(Exception e) {
         ErrorResponse errorResponse = new ErrorResponse();

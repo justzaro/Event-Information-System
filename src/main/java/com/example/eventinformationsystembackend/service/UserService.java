@@ -156,9 +156,7 @@ public class UserService {
         User user = userRepository.findUserByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException(USER_DOES_NOT_EXIST));
         String profilePicturePath = user.getProfilePicturePath();
-        byte[] profilePicture =
-                Files.readAllBytes(new File(profilePicturePath).toPath());
-        return profilePicture;
+        return Files.readAllBytes(new File(profilePicturePath).toPath());
     }
 
     public void deleteUser(String username) {
