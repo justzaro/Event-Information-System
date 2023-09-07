@@ -49,7 +49,7 @@ public class UserService {
         return modelMapper.map(user, UserDtoResponse.class);
     }
 
-    public UserDtoResponse registerUser(UserDto userDto, MultipartFile profilePicture) {
+    public UserDtoResponse registerUser(UserDto userDto) {
         checkForDuplicateUsername(userDto.getUsername());
         checkForDuplicateEmail(userDto.getEmail());
 
@@ -63,18 +63,23 @@ public class UserService {
 
         String userFolderPath = USERS_FOLDER_PATH + userToRegister.getUsername();
         String userPostsFolderPath = userFolderPath + "\\" + "Posts";
-        String userProfilePicturePath = userFolderPath + "\\" + profilePicture.getOriginalFilename();
+
+        //String userProfilePicturePath = null;
+
+//        if (profilePicture != null) {
+//            userProfilePicturePath = userFolderPath + "\\" + profilePicture.getOriginalFilename();
+//        }
 
         userToRegister.setUserRole(UserRole.USER);
         userToRegister.setIsEnabled(false);
         userToRegister.setIsLocked(false);
-        userToRegister.setProfilePicturePath(null);
-        userToRegister.setProfilePictureName(null);
-
+        userToRegister.setProfilePicturePath(DEFAULT_PROFILE_PICTURE_PATH);
+        userToRegister.setProfilePictureName("default-profile-picture.png");
 
         storageService.createFolder(userFolderPath);
         storageService.createFolder(userPostsFolderPath);
 
+        /*
         if (profilePicture != null) {
             if (!profilePicture.isEmpty()) {
                 userToRegister.setProfilePicturePath(userProfilePicturePath);
@@ -82,7 +87,7 @@ public class UserService {
                 storageService.savePictureToFileSystem(profilePicture, userProfilePicturePath);
             }
         }
-
+        */
         userRepository.save(userToRegister);
 
         String confirmationToken =
@@ -108,7 +113,11 @@ public class UserService {
             newUserFolderPath = USERS_FOLDER_PATH + userDto.getUsername();
             storageService.renameFolder(currentUserFolderPath, newUserFolderPath);
 
-            if (user.getProfilePicturePath() != null) {
+//            if (user.getProfilePicturePath() != null) {
+//                String newUserProfilePicturePath = newUserFolderPath + "\\" + user.getProfilePictureName();
+//                user.setProfilePicturePath(newUserProfilePicturePath);
+//            }
+            if (profilePicture != null) {
                 String newUserProfilePicturePath = newUserFolderPath + "\\" + user.getProfilePictureName();
                 user.setProfilePicturePath(newUserProfilePicturePath);
             }
@@ -125,9 +134,11 @@ public class UserService {
         }
 
         if (profilePicture != null && !profilePicture.isEmpty()) {
-            if (user.getProfilePicturePath() != null) {
-                storageService.deleteFile(user.getProfilePicturePath());
-            }
+//            if (user.getProfilePicturePath() != null) {
+//                storageService.deleteFile(user.getProfilePicturePath());
+//            }
+
+            storageService.deleteFile(user.getProfilePicturePath());
 
             String newUserProfilePicturePath = newUserFolderPath + "\\"
                     + profilePicture.getOriginalFilename();
@@ -135,6 +146,7 @@ public class UserService {
             storageService.savePictureToFileSystem(profilePicture, newUserProfilePicturePath);
 
             user.setProfilePicturePath(newUserProfilePicturePath);
+            user.setProfilePictureName(profilePicture.getOriginalFilename());
         }
 
         user.setFirstName(userDto.getFirstName());

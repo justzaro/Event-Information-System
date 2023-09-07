@@ -18,4 +18,6 @@ public class FilePaths {
 
     public static final String VERDANA_FONT_PATH =
             "D:\\Java Projects\\event-information-system-backend\\fonts\\verdana.ttf";
-}
+
+    public static final String DEFAULT_PROFILE_PICTURE_PATH =
+            "D:\\Java Projects\\event-information-system-images\\default-profile-picture.png";}

@@ -3,74 +3,77 @@ package com.example.eventinformationsystembackend.common;
 public class EmailTexts {
     public static final String ACCOUNT_CONFIRMATION_EMAIL_TEMPLATE =
                         """
-                        <!DOCTYPE html>
-                        <html>
-                        <head>
-                            <meta charset="UTF-8">
-                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                            <title>Account Confirmation</title>
-                            <style>
-                                body, p, h1 {
-                                    margin: 0;
-                                    padding: 0;
-                                }
-                                body {
-                                    font-family: Tahoma, Arial, sans-serif;
-                                    background-color: #f4f4f4;
-                                    padding: 20px;
-                                }
-                                .container {
-                                    max-width: 600px;
-                                    margin: 0 auto;
-                                    background-color: #ffffff;
-                                    padding: 20px;
-                                    border-radius: 10px;
-                                    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-                                }
-                                h1 {
-                                    color: #333333;
-                                    margin-bottom: 20px;
-                                    text-align: center;
-                                }
-                                p {
-                                    color: #555555;
-                                    margin-bottom: 10px;
-                                    font-size: 130%%;
-                                }
-                                .confirmation-link {
-                                    display: inline-block;
-                                    background-color: #007bff;
-                                    color: #ffffff;
-                                    text-decoration: none;
-                                    padding: 10px 20px;
-                                    border-radius: 5px;
-                                    transition: background-color 0.3s;
-                                }
-                                .confirmation-link:hover {
-                                    background-color: #0056b3;
-                                }
-                            </style>
-                        </head>
-                        <body>
-                            <div class="container">
-                                <h1>Account Confirmation</h1>
-                                <br>
-                                <p>Dear %s,</p>
-                                <p>Thank you for creating an account with us. To complete your account setup, please click the following link to confirm your email address:</p>
-                                <br>
-                                <center>
-                                <p><a class="confirmation-link" href="%s" style="font-size:130%%">Confirm My Account</a></p>
-                                </center>
-                                <br>
-                                <p>If the above link doesn't work, you can copy and paste the following URL into your browser:</p>
-                                <p><strong>%s</strong></p>
-                                <p>Thank you for choosing us!</p>
-                                <p>Best regards,</p>
-                                <p>The <b>Ticket Master</b> Team</p>
-                            </div>
-                        </body>
-                        </html>
-                        """;
+                                <!DOCTYPE html>
+                                <html>
+                                <head>
+                                    <meta charset="UTF-8">
+                                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                                    <title>Account Confirmation</title>
+                                    <style>
+                                        body, p, h1 {
+                                            margin: 0;
+                                            padding: 0;
+                                        }
+                                        body {
+                                            font-family: Tahoma, Arial, sans-serif;
+                                            background-color: #f4f4f4;
+                                            padding: 20px;
+                                        }
+                                        .container {
+                                            max-width: 600px;
+                                            margin: 0 auto;
+                                            background-color: #ffffff;
+                                            padding: 20px;
+                                            border-radius: 10px;
+                                            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                                        }
+                                        h1 {
+                                            color: #333333;
+                                            margin-bottom: 20px;
+                                            text-align: center;
+                                        }
+                                        p {
+                                            color: #555555;
+                                            margin-bottom: 10px;
+                                            font-size: 130%%;
+                                        }
+                                        .confirmation-link {
+                                            display: inline-block;
+                                            background-color: #007bff;
+                                            color: #ffffff;
+                                            text-decoration: none;
+                                            padding: 10px 20px;
+                                            border-radius: 5px;
+                                            transition: background-color 0.3s;
+                                        }
+                                        .confirmation-link:hover {
+                                            background-color: #0056b3;
+                                        }
+                                    </style>
+                                </head>
+                                <body>
+                                    <div class="container">
+                                        <h1>Account Confirmation</h1>
+                                        <br>
+                                        <p>Dear %s,</p>
+                                        <p>Thank you for creating an account with us. To complete your account setup, please click the following link to confirm your email address:</p>
+                                        <br>
+                                        <center>
+                                        <p><a class="confirmation-link" href="%s" style="font-size:130%%">Confirm My Account</a></p>
+                                        </center>
+                                        <br>
+                                        <p>If the above link doesn't work, you can copy and paste the following URL into your browser:</p>
+                                        <p><strong>%s</strong></p>
+                                        <hr>
+                                        <p>If you have any questions or need assistance, please don't hesitate to contact us via the support ticket page!</p>
+                                        <br>
+                                        <p>Thank you for choosing us!</p>
+                                        <p>Best regards,</p>
+                                        <p>The <b>Ticket Master</b> Team</p>
+                                    </div>
+                                </body>
+                                </html>
+                                """;
 
     public static final String ORDER_RECEIVED_EMAIL_TEMPLATE =
                         """
@@ -333,7 +336,7 @@ public class EmailTexts {
                                </div>
                                <div class="content">
                                <hr>
-                                   <p>If you have any questions or need assistance, please don't hesitate to contact us via the support ticket page!.</p>
+                                   <p>If you have any questions or need assistance, please don't hesitate to contact us via the support ticket page!</p>
                                    <br>
                                    <p>Thank you for choosing us!</p>
                                </div>

@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.MediaType;
+import org.springframework.web.servlet.view.RedirectView;
 
 import java.io.IOException;
 
@@ -29,9 +30,18 @@ public class UserController {
     }
 
     @GetMapping(path = "/confirm")
-    public String confirmToken(@RequestParam String token) {
-        return confirmationTokenService.confirmToken(token);
+    public RedirectView confirmToken(@RequestParam String token) {
+        boolean isConfirmed = confirmationTokenService.confirmToken(token);
+        String externalUrl = "http://localhost:3000/log-in?confirmationStatus=" + (isConfirmed ? "success" : "failure");
+        return new RedirectView(externalUrl);
     }
+
+/*    @GetMapping(path = "/confirm")
+    public String confirmToken(@RequestParam String token) {
+        confirmationTokenService.confirmToken(token);
+        String externalUrl = "http://localhost:3000/";
+        RedirectView redirectView = new RedirectView(externalUrl);
+    }*/
 
     @GetMapping(path = "/{username}")
     public UserDtoResponse getUser(@PathVariable("username") String username) {
@@ -47,10 +57,15 @@ public class UserController {
                 .body(profilePicture);
     }
 
+//    @PostMapping(path = "/register", consumes = {"multipart/form-data"})
+//    public UserDtoResponse registerUser(@RequestPart("userDto") @Valid UserDto userDto,
+//                                        @RequestPart(value = "profilePicture", required = false) MultipartFile profilePicture) {
+//        return userService.registerUser(userDto, profilePicture);
+//    }
+
     @PostMapping(path = "/register")
-    public UserDtoResponse registerUser(@Valid @RequestPart UserDto userDto,
-                                        @RequestPart(required = false) MultipartFile profilePicture) {
-        return userService.registerUser(userDto, profilePicture);
+    public UserDtoResponse registerUser(@RequestBody @Valid UserDto userDto) {
+        return userService.registerUser(userDto);
     }
 
     @PutMapping(path = "/update/{username}")
