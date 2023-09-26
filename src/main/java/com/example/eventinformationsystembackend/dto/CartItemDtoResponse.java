@@ -11,6 +11,13 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CartItemDtoResponse {
+
+    @NotNull
+    private Long id;
+
+    @NotNull
+    private Long eventId;
+
     @NotNull
     private String eventPicturePath;
 

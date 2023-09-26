@@ -11,9 +11,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PostDto {
-    @NotBlank
     private String description;
-
-    @NotBlank
     private String location;
 }

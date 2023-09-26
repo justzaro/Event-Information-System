@@ -61,6 +61,13 @@ public class OrderService {
         this.modelMapper = new ModelMapper();
     }
 
+    public OrderDtoResponse getOrderById(Long id) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(ORDER_DOES_NOT_EXIST));
+
+        return modelMapper.map(order, OrderDtoResponse.class);
+    }
+
     public List<OrderDtoResponse> getAllOrdersForUsers(String username) {
         User user = userRepository.findUserByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException(USER_DOES_NOT_EXIST));
@@ -73,7 +80,7 @@ public class OrderService {
                .collect(Collectors.toList());
     }
 
-/*    private Double getCartItemsTotalPriceWithoutCoupon(String username) {
+    private Double getCartItemsTotalPriceWithoutCoupon(String username) {
         List<CartItemDtoResponse> cartItems =
                 cartItemService.getAllCartItemsForUser(username);
 
@@ -84,9 +91,9 @@ public class OrderService {
         }
         System.out.println(totalPrice);
         return totalPrice;
-    }*/
+    }
 
-/*    public Double getCartItemsTotalPriceWithCoupon(String username, String couponCode) {
+    public Double getCartItemsTotalPriceWithCoupon(String username, String couponCode) {
         if (userRepository.findUserByUsername(username).isEmpty()) {
             throw new ResourceNotFoundException(USER_DOES_NOT_EXIST);
         }
@@ -94,10 +101,9 @@ public class OrderService {
 
         double totalPrice = getCartItemsTotalPriceWithoutCoupon(username);
         double discount = coupon.getDiscountPercentage() / 100;
-        double priceWithDiscount = totalPrice - (totalPrice * discount);
 
-        return priceWithDiscount;
-    }*/
+        return totalPrice - (totalPrice * discount);
+    }
 
     public void createOrder(String username, String couponCode) {
 
@@ -128,14 +134,15 @@ public class OrderService {
 
         Coupon coupon = null;
 
+        Order order = new Order();
+        order.setOriginalPrice(totalPrice);
+
         if (couponCode != null) {
             coupon = couponService.validateCoupon(couponCode);
             totalPrice = calculateTotalPriceWithDiscount(totalPrice, coupon);
             couponService.setCouponAsUsed(coupon);
         }
-
-        Order order = new Order();
-
+        
         order.setUser(user);
         order.setDateOfOrder(LocalDateTime.now());
         order.setCoupon(coupon);

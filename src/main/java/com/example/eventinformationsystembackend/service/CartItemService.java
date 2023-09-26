@@ -44,6 +44,10 @@ public class CartItemService {
         this.modelMapper = new ModelMapper();
     }
 
+    public Integer getAllCartItemsNumberForUser(String username) {
+        return getAllCartItemsForUser(username).size();
+    }
+
     public List<CartItem> getAllCartItemsForUser(User user) {
         if (userRepository.findUserByUsername(user.getUsername()).isEmpty()) {
             throw new ResourceNotFoundException(USER_DOES_NOT_EXIST);
@@ -68,6 +72,8 @@ public class CartItemService {
                     cartItemDtoResponse.setTicketQuantity(cartItem.getTicketQuantity());
                     cartItemDtoResponse.setTicketPrice(cartItem.getEvent().getTicketPrice());
                     cartItemDtoResponse.setTotalPrice(cartItem.getTotalPrice());
+                    cartItemDtoResponse.setId(cartItem.getId());
+                    cartItemDtoResponse.setEventId(cartItem.getEvent().getId());
                     return cartItemDtoResponse;
                 }).
                 collect(Collectors.toList());
@@ -93,6 +99,25 @@ public class CartItemService {
                }).
                collect(Collectors.toList());*/
     //}
+
+    public void decreaseCartItemTicketQuantity(CartItemDto cartItemDto) {
+        User user = userRepository.findUserByUsername(cartItemDto.getUsername())
+                .orElseThrow(() -> new ResourceNotFoundException(USER_DOES_NOT_EXIST));
+
+        Event event = eventRepository.findEventByName(cartItemDto.getEventName())
+                .orElseThrow(() -> new ResourceNotFoundException(EVENT_DOES_NOT_EXIST));
+
+        List<CartItem> cartItems = cartItemRepository.findAllByUser(user);
+
+        for (CartItem cartItem : cartItems) {
+            if (cartItem.getEvent().getName().equals(event.getName())) {
+                int cartItemTicketQuantity = cartItem.getTicketQuantity();
+                cartItem.setTicketQuantity(cartItemTicketQuantity - 1);
+
+                cartItemRepository.save(cartItem);
+            }
+        }
+    }
 
     public CartItemDtoResponse addCartItem(CartItemDto cartItemDto) {
         User user = userRepository.findUserByUsername(cartItemDto.getUsername())

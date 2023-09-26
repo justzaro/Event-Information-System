@@ -7,6 +7,8 @@ public class ExceptionMessages {
     public static final String POST_DOES_NOT_EXIST = "Such post does not exist!";
     public static final String CART_ITEM_DOES_NOT_EXIST = "Cart item with this ID does not exist!";
 
+    public static final String ORDER_DOES_NOT_EXIST = "Order with this ID does not exist!";
+
     public static final String COUPON_IS_INVALID = "Invalid coupon code!";
     public static final String COUPON_HAS_EXPIRED = "Coupon code has expired!";
     public static final String COUPON_HAS_BEEN_USED = "Coupon has already been used!";

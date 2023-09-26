@@ -1,7 +1,9 @@
 package com.example.eventinformationsystembackend.controller;
 
+import com.example.eventinformationsystembackend.dto.CommentDtoResponse;
 import com.example.eventinformationsystembackend.dto.PostDto;
 import com.example.eventinformationsystembackend.dto.PostDtoResponse;
+import com.example.eventinformationsystembackend.service.CommentService;
 import com.example.eventinformationsystembackend.service.PostService;
 import jakarta.validation.Valid;
 import org.apache.coyote.Response;
@@ -19,15 +21,23 @@ import java.util.List;
 @RequestMapping(path = "/posts")
 public class PostController {
     private final PostService postService;
+    private final CommentService commentService;
 
     @Autowired
-    public PostController(PostService postService) {
+    public PostController(PostService postService,
+                          CommentService commentService) {
         this.postService = postService;
+        this.commentService = commentService;
     }
 
     @GetMapping
     public List<PostDtoResponse> getAllPosts() {
         return postService.getAllPosts();
+    }
+
+    @GetMapping(path = "/{username}/comments")
+    public List<CommentDtoResponse> getAllCommentsUnderUsersPosts(@PathVariable("username") String username) {
+        return commentService.getAllCommentsUnderUsersPosts(username);
     }
 
     @GetMapping(path = "/picture/{postId}")
@@ -40,11 +50,18 @@ public class PostController {
                 .body(postPicture);
     }
 
-    @PostMapping(path = "/add/{username}")
+    @PostMapping(path = "/add/{username}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public PostDtoResponse addPost(@PathVariable("username") String username,
-                                   @RequestPart @Valid PostDto postDto,
-                                   @RequestPart MultipartFile postPicture) {
+                                   @RequestPart("postDto") @Valid PostDto postDto,
+                                   @RequestPart("postPicture") MultipartFile postPicture) {
         return postService.addPost(postDto, postPicture, username);
+    }
+
+    @DeleteMapping(path = "/self/{postId}/{username}")
+    public ResponseEntity<Void> deleteOwnedPost(@PathVariable("postId") Long postId,
+                                                @PathVariable("username") String username) {
+        postService.deleteOwnedPost(postId, username);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping(path = "/delete/{postId}")

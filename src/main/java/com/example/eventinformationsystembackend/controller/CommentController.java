@@ -25,7 +25,7 @@ public class CommentController {
         return commentService.getAllCommentsByUser(username);
     }
 
-    @PostMapping(path = "/add/{username}/{postId}")
+    @PostMapping(path = "/{username}/{postId}")
     public CommentDtoResponse addComment(@PathVariable("username") String username,
                                          @PathVariable("postId") Long postId,
                                          @Valid @RequestBody CommentDto commentDto) {

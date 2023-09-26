@@ -2,6 +2,7 @@ package com.example.eventinformationsystembackend.service;
 
 import com.example.eventinformationsystembackend.dto.CommentDto;
 import com.example.eventinformationsystembackend.dto.CommentDtoResponse;
+import com.example.eventinformationsystembackend.dto.PostDtoResponse;
 import com.example.eventinformationsystembackend.exception.ResourceNotFoundException;
 import com.example.eventinformationsystembackend.model.Comment;
 import com.example.eventinformationsystembackend.model.Post;
@@ -14,6 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,16 +27,19 @@ import static com.example.eventinformationsystembackend.common.ExceptionMessages
 public class CommentService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
+    private final PostService postService;
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
 
     @Autowired
     public CommentService(CommentRepository commentRepository,
                           PostRepository postRepository,
-                          UserRepository userRepository) {
+                          UserRepository userRepository,
+                          PostService postService) {
         this.commentRepository = commentRepository;
         this.postRepository = postRepository;
         this.userRepository = userRepository;
+        this.postService = postService;
         modelMapper = new ModelMapper();
     }
 
@@ -51,6 +58,8 @@ public class CommentService {
         commentToAdd.setPost(post);
         commentToAdd.setPostedAt(LocalDateTime.now());
 
+
+
         Comment newComment = commentRepository.save(commentToAdd);
         return modelMapper.map(newComment, CommentDtoResponse.class);
     }
@@ -65,5 +74,23 @@ public class CommentService {
                .stream()
                .map(comment -> modelMapper.map(comment, CommentDtoResponse.class))
                .collect(Collectors.toList());
+    }
+
+    public List<CommentDtoResponse> getAllCommentsUnderUsersPosts(String username) {
+        User user = userRepository.findUserByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException(USER_DOES_NOT_EXIST));
+
+        List<PostDtoResponse> userPosts = postService.getAllPostForUser(user);
+        List<CommentDtoResponse> allCommentsUnderUserPosts = new ArrayList<>();
+
+        for (PostDtoResponse post : userPosts) {
+            allCommentsUnderUserPosts.addAll(post.getComments());
+        }
+
+        allCommentsUnderUserPosts.sort(Comparator.comparing(CommentDtoResponse::getPostedAt).reversed());
+
+        //todo 1. refine all mappings 2. add a function which gets all comments, sorted, instead of the sorting above
+
+        return allCommentsUnderUserPosts;
     }
 }

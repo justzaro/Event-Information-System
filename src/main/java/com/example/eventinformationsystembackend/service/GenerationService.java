@@ -148,7 +148,7 @@ public class GenerationService {
         if (order.getCoupon() != null) {
             Coupon coupon = order.getCoupon();
             couponCode = coupon.getCouponCode();
-            discountAmount = totalOrderPrice - (totalOrderPrice * (coupon.getDiscountPercentage() / 100));
+            discountAmount = totalOrderPrice * (coupon.getDiscountPercentage() / 100);
             amountToPay -= discountAmount;
         }
 

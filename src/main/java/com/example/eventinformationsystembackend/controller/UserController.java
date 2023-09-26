@@ -48,9 +48,8 @@ public class UserController {
     }
 
     @PostMapping(path = "/register")
-    public UserDtoResponse registerUser(@Valid @RequestPart UserDto userDto,
-                                        @RequestPart(required = false) MultipartFile profilePicture) {
-        return userService.registerUser(userDto, profilePicture);
+    public UserDtoResponse registerUser(@Valid @RequestBody UserDto userDto) {
+        return userService.registerUser(userDto);
     }
 
     @PutMapping(path = "/update/{username}")

@@ -35,12 +35,16 @@ public class EventController {
                     .body(eventPicture);
     }
 
-    @GetMapping(path = "/{name}")
-    public EventDtoResponse getEventByName(@PathVariable("name") String name) {
-        return eventService.getEvent(name);
+//    @GetMapping(path = "/{name}")
+//    public EventDtoResponse getEventByName(@PathVariable("name") String name) {
+//        return eventService.getEvent(name);
+//    }
+
+    @GetMapping(path = "/{id}")
+    public EventDtoResponse getEventById(@PathVariable("id") Long id) {
+        return eventService.getEvent(id);
     }
 
-    @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping
     public List<EventDtoResponse> getAllEvents() {
         return eventService.getAllEvents();

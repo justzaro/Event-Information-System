@@ -49,7 +49,7 @@ public class UserService {
         return modelMapper.map(user, UserDtoResponse.class);
     }
 
-    public UserDtoResponse registerUser(UserDto userDto, MultipartFile profilePicture) {
+    public UserDtoResponse registerUser(UserDto userDto) {
         checkForDuplicateUsername(userDto.getUsername());
         checkForDuplicateEmail(userDto.getEmail());
 
@@ -63,25 +63,25 @@ public class UserService {
 
         String userFolderPath = USERS_FOLDER_PATH + userToRegister.getUsername();
         String userPostsFolderPath = userFolderPath + "\\" + "Posts";
-        String userProfilePicturePath = userFolderPath + "\\" + profilePicture.getOriginalFilename();
+//        String userProfilePicturePath = userFolderPath + "\\" + profilePicture.getOriginalFilename();
+        String userProfilePicturePath = DEFAULT_USER_PROFILE_PICTURE;
 
         userToRegister.setUserRole(UserRole.USER);
         userToRegister.setIsEnabled(false);
         userToRegister.setIsLocked(false);
-        userToRegister.setProfilePicturePath(null);
-        userToRegister.setProfilePictureName(null);
-
+        userToRegister.setProfilePicturePath(userProfilePicturePath);
+        userToRegister.setProfilePictureName("default_user_profile_picture.png");
 
         storageService.createFolder(userFolderPath);
         storageService.createFolder(userPostsFolderPath);
 
-        if (profilePicture != null) {
-            if (!profilePicture.isEmpty()) {
-                userToRegister.setProfilePicturePath(userProfilePicturePath);
-                userToRegister.setProfilePictureName(profilePicture.getOriginalFilename());
-                storageService.savePictureToFileSystem(profilePicture, userProfilePicturePath);
-            }
-        }
+//        if (profilePicture != null) {
+//            if (!profilePicture.isEmpty()) {
+//                userToRegister.setProfilePicturePath(userProfilePicturePath);
+//                userToRegister.setProfilePictureName(profilePicture.getOriginalFilename());
+//                storageService.savePictureToFileSystem(profilePicture, userProfilePicturePath);
+//            }
+//        }
 
         userRepository.save(userToRegister);
 

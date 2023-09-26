@@ -12,6 +12,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CartItemDto {
+
     @NotNull
     private String eventName;
 
