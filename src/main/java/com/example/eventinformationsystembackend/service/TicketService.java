@@ -58,7 +58,9 @@ public class TicketService {
         Optional<Ticket> ticket = ticketRepository.findByCode(ticketCode);
 
         if (ticket.isPresent()) {
-            if (ticket.get().getIsChecked()) {
+            if (!ticket.get().getIsChecked()) {
+                ticket.get().setIsChecked(true);
+                ticketRepository.save(ticket.get());
                 return "valid-ticket";
             } else {
                 return "checked-ticket";

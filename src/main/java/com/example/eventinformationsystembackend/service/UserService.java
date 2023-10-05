@@ -1,10 +1,11 @@
 package com.example.eventinformationsystembackend.service;
 
 import com.example.eventinformationsystembackend.common.enums.UserRole;
+import com.example.eventinformationsystembackend.dto.PasswordDto;
 import com.example.eventinformationsystembackend.dto.UserDto;
 import com.example.eventinformationsystembackend.dto.UserDtoResponse;
-import com.example.eventinformationsystembackend.exception.DuplicateUniqueFieldException;
-import com.example.eventinformationsystembackend.exception.ResourceNotFoundException;
+import com.example.eventinformationsystembackend.exception.*;
+import com.example.eventinformationsystembackend.model.Post;
 import com.example.eventinformationsystembackend.model.User;
 import com.example.eventinformationsystembackend.repository.UserRepository;
 
@@ -29,17 +30,20 @@ public class UserService {
     private final ConfirmationTokenService confirmationTokenService;
     private final EmailService emailService;
     private final StorageService storageService;
+    private final PostService postService;
 
     @Autowired
     public UserService(UserRepository userRepository,
                        ConfirmationTokenService confirmationTokenService,
                        EmailService emailService,
-                       StorageService storageService) {
+                       StorageService storageService,
+                       PostService postService) {
         this.userRepository = userRepository;
         this.modelMapper = new ModelMapper();
         this.confirmationTokenService = confirmationTokenService;
         this.emailService = emailService;
         this.storageService = storageService;
+        this.postService = postService;
     }
 
     public UserDtoResponse getUser(String username) {
@@ -53,11 +57,11 @@ public class UserService {
         checkForDuplicateUsername(userDto.getUsername());
         checkForDuplicateEmail(userDto.getEmail());
 
-        if (userDto.getPhoneNumber() != null) {
+/*        if (userDto.getPhoneNumber() != null) {
             if (!userDto.getPhoneNumber().isEmpty()) {
                 checkForDuplicatePhoneNumber(userDto.getPhoneNumber());
             }
-        }
+        }*/
 
         User userToRegister = modelMapper.map(userDto, User.class);
 
@@ -95,6 +99,15 @@ public class UserService {
         return modelMapper.map(userToRegister, UserDtoResponse.class);
     }
 
+    public void resetProfilePictureToDefault(String username) {
+        User user = userRepository.findUserByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException(USER_DOES_NOT_EXIST));
+
+        user.setProfilePicturePath(DEFAULT_USER_PROFILE_PICTURE);
+        user.setProfilePictureName(DEFAULT_USER_PROFILE_PICTURE_NAME);
+        userRepository.save(user);
+    }
+
     public UserDtoResponse updateUser(UserDto userDto, String username,
                                       MultipartFile profilePicture) {
         User user = userRepository.findUserByUsername(username)
@@ -112,20 +125,24 @@ public class UserService {
                 String newUserProfilePicturePath = newUserFolderPath + "\\" + user.getProfilePictureName();
                 user.setProfilePicturePath(newUserProfilePicturePath);
             }
+
+            postService.replaceOldUsernameWithNewOneInPicturePathForAllUserPosts(username,
+                    userDto.getUsername());
         }
 
         if (!user.getEmail().equals(userDto.getEmail())) {
             checkForDuplicateEmail(userDto.getEmail());
         }
 
-        if (userDto.getPhoneNumber() != null) {
+/*        if (userDto.getPhoneNumber() != null) {
             if (!user.getPhoneNumber().equals(userDto.getPhoneNumber())) {
                 checkForDuplicatePhoneNumber(userDto.getPhoneNumber());
             }
-        }
+        }*/
 
         if (profilePicture != null && !profilePicture.isEmpty()) {
-            if (user.getProfilePicturePath() != null) {
+            if (user.getProfilePicturePath() != null
+            && !user.getProfilePictureName().equals(DEFAULT_USER_PROFILE_PICTURE_NAME)) {
                 storageService.deleteFile(user.getProfilePicturePath());
             }
 
@@ -135,17 +152,18 @@ public class UserService {
             storageService.savePictureToFileSystem(profilePicture, newUserProfilePicturePath);
 
             user.setProfilePicturePath(newUserProfilePicturePath);
+            user.setProfilePictureName(profilePicture.getOriginalFilename());
         }
 
         user.setFirstName(userDto.getFirstName());
         user.setLastName(userDto.getLastName());
         user.setUsername(userDto.getUsername());
-        user.setPassword(userDto.getPassword());
+        //user.setPassword(userDto.getPassword());
         user.setEmail(userDto.getEmail());
-        user.setPhoneNumber(userDto.getPhoneNumber());
+        //user.setPhoneNumber(userDto.getPhoneNumber());
         user.setDateOfBirth(userDto.getDateOfBirth());
         user.setAddress(userDto.getAddress());
-        user.setDescription(userDto.getDescription());
+        //user.setDescription(userDto.getDescription());
 
         User updatedUser = userRepository.save(user);
 
@@ -157,6 +175,26 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException(USER_DOES_NOT_EXIST));
         String profilePicturePath = user.getProfilePicturePath();
         return Files.readAllBytes(new File(profilePicturePath).toPath());
+    }
+
+    public void changePassword(String username, PasswordDto passwordDto) {
+        User user = userRepository.findUserByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException(USER_DOES_NOT_EXIST));
+
+        if (!passwordDto.getOldPassword().equals(passwordDto.getConfirmedOldPassword())) {
+            throw new OldPasswordFieldsDoNotMatch(OLD_PASSWORD_FIELDS_DO_NOT_MATCH);
+        }
+
+        if (!user.getPassword().equals(passwordDto.getOldPassword())) {
+            throw new WrongPasswordException(WRONG_PASSWORD_EXCEPTION);
+        }
+
+        if (passwordDto.getOldPassword().equals(passwordDto.getNewPassword())) {
+            throw new OldPasswordMatchesNewPassword(OLD_PASSWORD_MATCHES_NEW_PASSWORD);
+        }
+
+        user.setPassword(passwordDto.getNewPassword());
+        userRepository.save(user);
     }
 
     public void deleteUser(String username) {

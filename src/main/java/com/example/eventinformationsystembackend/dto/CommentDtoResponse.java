@@ -14,8 +14,21 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CommentDtoResponse {
+
+    @NotBlank
+    private Long id;
+
+    @NotBlank
+    private Long postId;
+
     @NotBlank
     private String commentBody;
+
+    @NotBlank
+    private Boolean isRead;
+
+    @NotBlank
+    private Boolean isRemoved;
 
     @JsonFormat(pattern = "HH:mm dd-MM-yyyy")
     private LocalDateTime postedAt;

@@ -4,6 +4,7 @@ import com.example.eventinformationsystembackend.dto.PostDto;
 import com.example.eventinformationsystembackend.dto.PostDtoResponse;
 import com.example.eventinformationsystembackend.exception.PostDoesNotContainImageException;
 import com.example.eventinformationsystembackend.exception.ResourceNotFoundException;
+import com.example.eventinformationsystembackend.model.Comment;
 import com.example.eventinformationsystembackend.model.Post;
 import com.example.eventinformationsystembackend.model.User;
 import com.example.eventinformationsystembackend.repository.PostRepository;
@@ -109,5 +110,19 @@ public class PostService {
                 .orElseThrow(() -> new ResourceNotFoundException(POST_DOES_NOT_EXIST));
         String postPicturePath = post.getPostPicturePath();
         return Files.readAllBytes(new File(postPicturePath).toPath());
+    }
+
+    public void replaceOldUsernameWithNewOneInPicturePathForAllUserPosts(String oldUsername,
+                                                                         String newUsername) {
+        User user = userRepository.findUserByUsername(oldUsername)
+                .orElseThrow(() -> new ResourceNotFoundException(USER_DOES_NOT_EXIST));
+
+        List<PostDtoResponse> allUserPosts = getAllPostForUser(user);
+
+        for (PostDtoResponse post : allUserPosts) {
+            String updatedPath = post.getPostPicturePath().replace(oldUsername, newUsername);
+            post.setPostPicturePath(updatedPath);
+            postRepository.save(modelMapper.map(post, Post.class));
+        }
     }
 }

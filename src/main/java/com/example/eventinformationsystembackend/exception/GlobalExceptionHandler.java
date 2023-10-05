@@ -1,6 +1,5 @@
 package com.example.eventinformationsystembackend.exception;
 
-import com.example.eventinformationsystembackend.model.CartItem;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -47,7 +46,9 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler({DuplicateUniqueFieldException.class,
-                       NotEnoughSeatsException.class})
+                       NotEnoughSeatsException.class,
+                       OldPasswordMatchesNewPassword.class
+    })
     public ResponseEntity<ErrorResponse> handleDuplicateUniqueFieldException(Exception e) {
         ErrorResponse errorResponse = new ErrorResponse();
 
@@ -65,7 +66,9 @@ public class GlobalExceptionHandler {
             EmailAlreadyConfirmedException.class,
             EmptyCartException.class,
             CartItemTicketsExceedEventCapacity.class,
-            PostDoesNotContainImageException.class
+            PostDoesNotContainImageException.class,
+            OldPasswordFieldsDoNotMatch.class,
+            WrongPasswordException.class
     })
     public ResponseEntity<ErrorResponse> handleInvalidEventDateException(Exception e) {
         ErrorResponse errorResponse = new ErrorResponse();

@@ -57,8 +57,8 @@ public class CommentService {
         commentToAdd.setUser(user);
         commentToAdd.setPost(post);
         commentToAdd.setPostedAt(LocalDateTime.now());
-
-
+        commentToAdd.setIsRead(false);
+        commentToAdd.setIsRemoved(false);
 
         Comment newComment = commentRepository.save(commentToAdd);
         return modelMapper.map(newComment, CommentDtoResponse.class);
@@ -92,5 +92,28 @@ public class CommentService {
         //todo 1. refine all mappings 2. add a function which gets all comments, sorted, instead of the sorting above
 
         return allCommentsUnderUserPosts;
+    }
+
+    public void deleteComment(Long commentId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new ResourceNotFoundException(COMMENT_DOES_NOT_EXIST));
+
+        commentRepository.delete(comment);
+    }
+
+    public void markCommentAsRead(Long commentId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new ResourceNotFoundException(COMMENT_DOES_NOT_EXIST));
+
+        comment.setIsRead(true);
+        commentRepository.save(comment);
+    }
+
+    public void markCommentAsRemoved(Long commentId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new ResourceNotFoundException(COMMENT_DOES_NOT_EXIST));
+
+        comment.setIsRemoved(true);
+        commentRepository.save(comment);
     }
 }
