@@ -70,6 +70,7 @@ public class UserService {
 //        String userProfilePicturePath = userFolderPath + "\\" + profilePicture.getOriginalFilename();
         String userProfilePicturePath = DEFAULT_USER_PROFILE_PICTURE;
 
+
         userToRegister.setUserRole(UserRole.USER);
         userToRegister.setIsEnabled(false);
         userToRegister.setIsLocked(false);
@@ -86,6 +87,7 @@ public class UserService {
 //                storageService.savePictureToFileSystem(profilePicture, userProfilePicturePath);
 //            }
 //        }
+
 
         userRepository.save(userToRegister);
 
@@ -121,7 +123,11 @@ public class UserService {
             newUserFolderPath = USERS_FOLDER_PATH + userDto.getUsername();
             storageService.renameFolder(currentUserFolderPath, newUserFolderPath);
 
-            if (user.getProfilePicturePath() != null) {
+//            if (user.getProfilePicturePath() != null) {
+//                String newUserProfilePicturePath = newUserFolderPath + "\\" + user.getProfilePictureName();
+//                user.setProfilePicturePath(newUserProfilePicturePath);
+//            }
+            if (profilePicture != null) {
                 String newUserProfilePicturePath = newUserFolderPath + "\\" + user.getProfilePictureName();
                 user.setProfilePicturePath(newUserProfilePicturePath);
             }

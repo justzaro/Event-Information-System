@@ -44,7 +44,7 @@ public class ConfirmationTokenService {
         return token;
     }
 
-    public String confirmToken(String token) {
+    public boolean confirmToken(String token) {
 
         ConfirmationToken confirmationToken = confirmationTokenRepository.
                 findConfirmationTokenByToken(token)
@@ -64,7 +64,7 @@ public class ConfirmationTokenService {
         updateTokenConfirmedAtField(token);
         userRepository.updateIsEnabledColumn(confirmationToken.getUser().getUsername());
 
-        return "confirmed";
+        return true;
     }
 
     public void updateTokenConfirmedAtField(String token) {

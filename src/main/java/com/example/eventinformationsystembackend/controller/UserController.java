@@ -44,6 +44,13 @@ public class UserController {
         return new RedirectView(redirectUrl);
     }
 
+/*    @GetMapping(path = "/confirm")
+    public String confirmToken(@RequestParam String token) {
+        confirmationTokenService.confirmToken(token);
+        String externalUrl = "http://localhost:3000/";
+        RedirectView redirectView = new RedirectView(externalUrl);
+    }*/
+
     @GetMapping(path = "/{username}")
     public UserDtoResponse getUser(@PathVariable("username") String username) {
         return userService.getUser(username);
@@ -72,7 +79,7 @@ public class UserController {
     }
 
     @PostMapping(path = "/register")
-    public UserDtoResponse registerUser(@Valid @RequestBody UserDto userDto) {
+    public UserDtoResponse registerUser(@RequestBody @Valid UserDto userDto) {
         return userService.registerUser(userDto);
     }
 
