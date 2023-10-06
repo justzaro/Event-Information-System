@@ -25,6 +25,9 @@ public class Order {
     @Column(name = "tickets_bought", nullable = false)
     private Integer ticketsBought;
 
+    @Column(name = "original_price", nullable = false)
+    private Double originalPrice;
+
     @Column(name = "total_price", nullable = false)
     private Double totalPrice;
 

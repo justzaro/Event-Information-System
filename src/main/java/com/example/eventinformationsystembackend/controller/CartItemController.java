@@ -19,17 +19,25 @@ import java.util.Set;
 public class CartItemController {
 
     private final CartItemService cartItemService;
+    private final OrderService orderService;
 
     @Autowired
-    public CartItemController(CartItemService cartItemService) {
+    public CartItemController(CartItemService cartItemService, OrderService orderService) {
         this.cartItemService = cartItemService;
+        this.orderService = orderService;
     }
 
-/*    @GetMapping(path = "/coupon/{username}")
+    @GetMapping(path = "/coupon/{username}")
     public Double applyCoupon(@PathVariable("username") String username,
-                              @RequestParam("couponCode") String couponCode) {
+                              @RequestParam(value = "couponCode") String couponCode) {
         return orderService.getCartItemsTotalPriceWithCoupon(username, couponCode);
-    }*/
+    }
+
+    @GetMapping("/number/{username}")
+    public Integer getAllCartItemsNumberForUser(
+            @PathVariable("username") String username) {
+        return cartItemService.getAllCartItemsNumberForUser(username);
+    }
 
     @GetMapping("/{username}")
     public List<CartItemDtoResponse> getAllCartItemsForUser(
@@ -40,6 +48,12 @@ public class CartItemController {
     @PostMapping
     public CartItemDtoResponse addCartItem(@RequestBody @Valid CartItemDto cartItemDto) {
         return cartItemService.addCartItem(cartItemDto);
+    }
+
+    @PostMapping(path = "/decrease")
+    public ResponseEntity<Void> decreaseCartItemTicketQuantity(@RequestBody @Valid CartItemDto cartItemDto) {
+        cartItemService.decreaseCartItemTicketQuantity(cartItemDto);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping(path = "/{id}")

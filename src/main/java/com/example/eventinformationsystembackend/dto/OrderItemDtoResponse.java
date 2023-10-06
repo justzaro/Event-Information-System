@@ -18,14 +18,6 @@ public class OrderItemDtoResponse {
     private Long id;
     private List<TicketDtoResponse> tickets;
 
-    private OrderDtoResponse order;
+    //private OrderDtoResponse order;
 
-    @Override
-    public String toString() {
-        return "OrderItemDtoResponse{" +
-                "id=" + id +
-                ", tickets=" + tickets +
-                ", order=" + order +
-                '}';
-    }
 }

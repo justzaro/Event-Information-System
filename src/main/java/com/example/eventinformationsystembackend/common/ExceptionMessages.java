@@ -6,6 +6,12 @@ public class ExceptionMessages {
     public static final String TOKEN_DOES_NOT_EXIST = "Such token does not exist!";
     public static final String POST_DOES_NOT_EXIST = "Such post does not exist!";
     public static final String CART_ITEM_DOES_NOT_EXIST = "Cart item with this ID does not exist!";
+    public static final String COMMENT_DOES_NOT_EXIST = "Comment with this ID does not exist!";
+    public static final String TICKET_DOES_NOT_EXIST = "Ticket with this code does not exist!";
+
+
+
+    public static final String ORDER_DOES_NOT_EXIST = "Order with this ID does not exist!";
 
     public static final String COUPON_IS_INVALID = "Invalid coupon code!";
     public static final String COUPON_HAS_EXPIRED = "Coupon code has expired!";
@@ -30,4 +36,10 @@ public class ExceptionMessages {
             "Event start date is after end date!";
     public static final String EQUAL_START_AND_END_DATE =
             "Start date is equal to end date!";
+
+    public static final String OLD_PASSWORD_FIELDS_DO_NOT_MATCH = "Old password and confirm old password fields do not match!";
+    public static final String OLD_PASSWORD_MATCHES_NEW_PASSWORD = "Old password matches the new password!";
+
+    public static final String WRONG_PASSWORD_EXCEPTION = "Wrong profile password!";
+
 }

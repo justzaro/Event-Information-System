@@ -27,7 +27,12 @@ public class OrderController {
         this.orderItemService = orderItemService;
     }
 
-    @GetMapping(path = "/{username}")
+    @GetMapping(path = "/{id}")
+    public OrderDtoResponse getOrderById(@PathVariable("id") Long id) {
+        return orderService.getOrderById(id);
+    }
+
+    @GetMapping(path = "/all/{username}")
     public List<OrderDtoResponse> getAllOrdersForUser(@PathVariable("username") String username) {
         return orderService.getAllOrdersForUsers(username);
     }

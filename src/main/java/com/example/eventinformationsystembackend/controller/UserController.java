@@ -1,5 +1,6 @@
 package com.example.eventinformationsystembackend.controller;
 
+import com.example.eventinformationsystembackend.dto.PasswordDto;
 import com.example.eventinformationsystembackend.dto.UserDto;
 import com.example.eventinformationsystembackend.dto.UserDtoResponse;
 import com.example.eventinformationsystembackend.service.ConfirmationTokenService;
@@ -31,9 +32,16 @@ public class UserController {
 
     @GetMapping(path = "/confirm")
     public RedirectView confirmToken(@RequestParam String token) {
-        boolean isConfirmed = confirmationTokenService.confirmToken(token);
-        String externalUrl = "http://localhost:3000/log-in?confirmationStatus=" + (isConfirmed ? "success" : "failure");
-        return new RedirectView(externalUrl);
+        String confirmationStatus = "success";
+
+        if (!confirmationTokenService.confirmToken(token).equals("confirmed")) {
+            confirmationStatus = "failure";
+        }
+
+        String redirectUrl =
+                "http://localhost:3000/log-in?confirmationStatus=" + confirmationStatus;
+
+        return new RedirectView(redirectUrl);
     }
 
 /*    @GetMapping(path = "/confirm")
@@ -57,11 +65,18 @@ public class UserController {
                 .body(profilePicture);
     }
 
-//    @PostMapping(path = "/register", consumes = {"multipart/form-data"})
-//    public UserDtoResponse registerUser(@RequestPart("userDto") @Valid UserDto userDto,
-//                                        @RequestPart(value = "profilePicture", required = false) MultipartFile profilePicture) {
-//        return userService.registerUser(userDto, profilePicture);
-//    }
+    @PutMapping(path = "/password/{username}")
+    public ResponseEntity<?> changePassword(@PathVariable("username") String username,
+                                            @Valid @RequestBody PasswordDto passwordDto) {
+        userService.changePassword(username, passwordDto);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping(path = "/profile-picture/default/{username}")
+    public ResponseEntity<?> resetProfilePictureToDefault(@PathVariable("username") String username) {
+        userService.resetProfilePictureToDefault(username);
+        return ResponseEntity.ok().build();
+    }
 
     @PostMapping(path = "/register")
     public UserDtoResponse registerUser(@RequestBody @Valid UserDto userDto) {

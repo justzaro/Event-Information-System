@@ -1,6 +1,7 @@
 package com.example.eventinformationsystembackend.dto;
 
 import com.example.eventinformationsystembackend.common.enums.UserRole;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Future;
@@ -39,6 +40,7 @@ public class UserDtoResponse {
     @NotBlank
     private String phoneNumber;
 
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate dateOfBirth;
 
     @NotBlank

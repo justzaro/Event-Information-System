@@ -10,14 +10,16 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class OrderDtoResponse {
+
     @NotNull
-    private String eventName;
+    private Long id;
 
     @NotBlank
     private Integer ticketsBought;
@@ -28,6 +30,11 @@ public class OrderDtoResponse {
     @NotBlank
     private Double totalPrice;
 
+    @NotBlank
+    private Double originalPrice;
+
     @JsonFormat(pattern = "HH:mm:ss dd-MM-yyyy")
     private LocalDateTime dateOfOrder;
+
+    private List<OrderItemDtoResponse> orderItems;
 }

@@ -86,6 +86,10 @@ public class EventService {
             throw new InvalidEventDateException(EQUAL_START_AND_END_DATE);
         }
 
+        if (eventPicture == null) {
+            System.out.println("asddsa");
+        }
+
         Event eventToAdd = modelMapper.map(eventDto, Event.class);
 
         String eventFolderPath = EVENTS_FOLDER_PATH + eventToAdd.getName();

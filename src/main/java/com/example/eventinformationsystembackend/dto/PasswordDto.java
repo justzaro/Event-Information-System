@@ -10,7 +10,13 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class PostDto {
-    private String description;
-    private String location;
+public class PasswordDto {
+    @NotBlank
+    private String oldPassword;
+
+    @NotBlank
+    private String confirmedOldPassword;
+
+    @NotBlank
+    private String newPassword;
 }
