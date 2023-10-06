@@ -4,6 +4,7 @@ import com.example.eventinformationsystembackend.common.enums.UserRole;
 import com.example.eventinformationsystembackend.dto.PasswordDto;
 import com.example.eventinformationsystembackend.dto.UserDto;
 import com.example.eventinformationsystembackend.dto.UserDtoResponse;
+import com.example.eventinformationsystembackend.dto.UserUpdateDto;
 import com.example.eventinformationsystembackend.exception.*;
 import com.example.eventinformationsystembackend.model.Post;
 import com.example.eventinformationsystembackend.model.User;
@@ -88,6 +89,14 @@ public class UserService {
 //            }
 //        }
 
+        userToRegister.setFirstName(userDto.getFirstName());
+        userToRegister.setLastName(userDto.getLastName());
+        userToRegister.setUsername(userDto.getUsername());
+        userToRegister.setPassword(userDto.getPassword());
+        userToRegister.setEmail(userDto.getEmail());
+        //user.setPhoneNumber(userDto.getPhoneNumber());
+        userToRegister.setDateOfBirth(userDto.getDateOfBirth());
+        userToRegister.setAddress(userDto.getAddress());
 
         userRepository.save(userToRegister);
 
@@ -110,7 +119,7 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public UserDtoResponse updateUser(UserDto userDto, String username,
+    public UserDtoResponse updateUser(UserUpdateDto userUpdateDto, String username,
                                       MultipartFile profilePicture) {
         User user = userRepository.findUserByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException(USER_DOES_NOT_EXIST));
@@ -118,9 +127,9 @@ public class UserService {
         String currentUserFolderPath = USERS_FOLDER_PATH + user.getUsername();
         String newUserFolderPath = USERS_FOLDER_PATH + user.getUsername();
 
-        if (!user.getUsername().equals(userDto.getUsername())) {
-            checkForDuplicateUsername(userDto.getUsername());
-            newUserFolderPath = USERS_FOLDER_PATH + userDto.getUsername();
+        if (!user.getUsername().equals(userUpdateDto.getUsername())) {
+            checkForDuplicateUsername(userUpdateDto.getUsername());
+            newUserFolderPath = USERS_FOLDER_PATH + userUpdateDto.getUsername();
             storageService.renameFolder(currentUserFolderPath, newUserFolderPath);
 
 //            if (user.getProfilePicturePath() != null) {
@@ -133,11 +142,11 @@ public class UserService {
             }
 
             postService.replaceOldUsernameWithNewOneInPicturePathForAllUserPosts(username,
-                    userDto.getUsername());
+                    userUpdateDto.getUsername());
         }
 
-        if (!user.getEmail().equals(userDto.getEmail())) {
-            checkForDuplicateEmail(userDto.getEmail());
+        if (!user.getEmail().equals(userUpdateDto.getEmail())) {
+            checkForDuplicateEmail(userUpdateDto.getEmail());
         }
 
 /*        if (userDto.getPhoneNumber() != null) {
@@ -161,14 +170,14 @@ public class UserService {
             user.setProfilePictureName(profilePicture.getOriginalFilename());
         }
 
-        user.setFirstName(userDto.getFirstName());
-        user.setLastName(userDto.getLastName());
-        user.setUsername(userDto.getUsername());
+        user.setFirstName(userUpdateDto.getFirstName());
+        user.setLastName(userUpdateDto.getLastName());
+        user.setUsername(userUpdateDto.getUsername());
         //user.setPassword(userDto.getPassword());
-        user.setEmail(userDto.getEmail());
+        user.setEmail(userUpdateDto.getEmail());
         //user.setPhoneNumber(userDto.getPhoneNumber());
-        user.setDateOfBirth(userDto.getDateOfBirth());
-        user.setAddress(userDto.getAddress());
+        user.setDateOfBirth(userUpdateDto.getDateOfBirth());
+        user.setAddress(userUpdateDto.getAddress());
         //user.setDescription(userDto.getDescription());
 
         User updatedUser = userRepository.save(user);

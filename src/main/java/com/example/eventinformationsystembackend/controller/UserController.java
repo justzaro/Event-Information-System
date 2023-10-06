@@ -3,6 +3,7 @@ package com.example.eventinformationsystembackend.controller;
 import com.example.eventinformationsystembackend.dto.PasswordDto;
 import com.example.eventinformationsystembackend.dto.UserDto;
 import com.example.eventinformationsystembackend.dto.UserDtoResponse;
+import com.example.eventinformationsystembackend.dto.UserUpdateDto;
 import com.example.eventinformationsystembackend.service.ConfirmationTokenService;
 import com.example.eventinformationsystembackend.service.UserService;
 import jakarta.validation.Valid;
@@ -34,7 +35,7 @@ public class UserController {
     public RedirectView confirmToken(@RequestParam String token) {
         String confirmationStatus = "success";
 
-        if (!confirmationTokenService.confirmToken(token).equals("confirmed")) {
+        if (!confirmationTokenService.confirmToken(token)) {
             confirmationStatus = "failure";
         }
 
@@ -85,9 +86,9 @@ public class UserController {
 
     @PutMapping(path = "/update/{username}")
     public UserDtoResponse updateUser(@PathVariable("username") String username,
-                                      @RequestPart @Valid UserDto userDto,
+                                      @RequestPart @Valid UserUpdateDto userUpdateDto,
                                       @RequestPart(required = false) MultipartFile profilePicture) {
-        return userService.updateUser(userDto, username, profilePicture);
+        return userService.updateUser(userUpdateDto, username, profilePicture);
     }
 
     @DeleteMapping(path = "/delete/{username}")
