@@ -34,10 +34,10 @@ public class EventDto {
     @Size(max = 255)
     private String location;
 
-    @JsonFormat(pattern = "HH:mm dd-MM-yyyy")
+    @JsonFormat(pattern = "HH:mm yyyy-MM-dd")
     private LocalDateTime startDate;
 
-    @JsonFormat(pattern = "HH:mm dd-MM-yyyy")
+    @JsonFormat(pattern = "HH:mm yyyy-MM-dd")
     private LocalDateTime endDate;
 
     @NotNull(message = "Capacity field must not be null!")

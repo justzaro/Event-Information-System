@@ -2,7 +2,9 @@ package com.example.eventinformationsystembackend.controller;
 
 import com.example.eventinformationsystembackend.model.Ticket;
 import com.example.eventinformationsystembackend.service.TicketService;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,7 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
 
-@Controller
+import java.util.List;
+
+@RestController
 @RequestMapping(path = "/tickets")
 public class TicketController {
     private final TicketService ticketService;
@@ -23,8 +27,15 @@ public class TicketController {
     }
 
     @GetMapping(path = "/verification/{ticketCode}")
-    public String verifyTicket(@PathVariable("ticketCode") String ticketCode) {
-        return ticketService.verifyTicket(ticketCode);
+    public ModelAndView verifyTicket(@PathVariable("ticketCode") String ticketCode) {
+        ModelAndView responseTemplatePage = new ModelAndView();
+        responseTemplatePage.setViewName(ticketService.verifyTicket(ticketCode));
+        return responseTemplatePage;
+    }
+
+    @GetMapping("/sold-per-day-in-last-days/{days}")
+    public List<Integer> getSoldTicketsCountPerDayForTheThirtyDays(@PathVariable("days") int days) {
+        return ticketService.getSoldTicketsCountPerDayForTheLastSelectedDays(days);
     }
 /*    @GetMapping(path = "/verification/{ticketCode}")
     public RedirectView verifyTicket(@PathVariable("ticketCode") String ticketCode) {

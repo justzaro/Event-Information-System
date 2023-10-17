@@ -26,7 +26,6 @@ public class SecurityConfiguration {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http)
             throws Exception {
@@ -34,9 +33,10 @@ public class SecurityConfiguration {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth.
-                        requestMatchers("/auth/**", "/users/confirm","/users/profile-picture/*", "/posts/picture/*", "/users/register", "/events", "events/event-picture/*", "events/{id}", "/tickets/verification/*").permitAll()
-                .anyRequest().authenticated())
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/auth/**", "/users/confirm","/users/profile-picture/*", "/posts/picture/*", "/users/register", "/tickets/verification/*").permitAll()
+                        .requestMatchers("/events", "/events/{id:\\d+}", "events/event-picture/{id:.+}").permitAll()
+                        .anyRequest().authenticated())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

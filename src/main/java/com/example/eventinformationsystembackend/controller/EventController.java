@@ -3,6 +3,7 @@ package com.example.eventinformationsystembackend.controller;
 import com.example.eventinformationsystembackend.dto.*;
 import com.example.eventinformationsystembackend.service.EventService;
 import jakarta.validation.Valid;
+import jakarta.websocket.server.PathParam;
 import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -48,6 +49,31 @@ public class EventController {
     @GetMapping
     public List<EventDtoResponse> getAllEvents() {
         return eventService.getAllEvents();
+    }
+
+    @GetMapping("/active")
+    public int getNumberOfActiveEvents() {
+        return eventService.getNumberOfActiveEvents();
+    }
+
+    @GetMapping("/upcoming")
+    public int getNumberOfUpcomingEvents(@RequestParam("type") int type) {
+        return eventService.getNumberOfUpcomingEvents(type);
+    }
+
+    @GetMapping("/booked")
+    public int getNumberOfBookedEventsInThePast(@RequestParam("type") int type) {
+        return eventService.getNumberOfBookedEvents(type);
+    }
+
+    @GetMapping("/inactive")
+    public int getNumberOfInactiveEvents() {
+        return eventService.getNumberOfInactiveEvents();
+    }
+
+    @GetMapping("/{eventId}/attendance")
+    public int getAttendancePercentageForEvent(@PathVariable("eventId") Long eventId) {
+        return eventService.getAttendancePercentageForEvent(eventId);
     }
 
     @PostMapping(path = "/add")

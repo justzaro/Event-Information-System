@@ -17,12 +17,14 @@ import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.aop.AopInvocationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -36,17 +38,20 @@ public class EventService {
     private final OrderRepository orderRepository;
     private final StorageService storageService;
     private final ImageService imageService;
+    private final TicketService ticketService;
     private final ModelMapper modelMapper;
 
     @Autowired
     public EventService(EventRepository eventRepository,
                         OrderRepository orderRepository,
                         StorageService storageService,
-                        ImageService imageService) {
+                        ImageService imageService,
+                        @Lazy TicketService ticketService) {
         this.eventRepository = eventRepository;
         this.orderRepository = orderRepository;
         this.storageService = storageService;
         this.imageService = imageService;
+        this.ticketService = ticketService;
         this.modelMapper = new ModelMapper();
     }
 
@@ -209,4 +214,50 @@ public class EventService {
         return ticketQuantity <= eventCapacity && ticketQuantity <= availableTickets;
     }
 
+    public int getNumberOfUpcomingEvents(int type) {
+        int daysToAdd = 0;
+
+        switch (type) {
+            case 1 -> daysToAdd = 7;
+            case 2 -> daysToAdd = 30;
+            case 3 -> daysToAdd = 90;
+            case 4 -> daysToAdd = 180;
+            case 5 -> daysToAdd = 360;
+        }
+
+        LocalDateTime boundary = LocalDateTime.now().plusDays(daysToAdd);
+        System.out.println(boundary);
+        return eventRepository.countAllBetweenNowAndBoundaryDate(boundary);
+    }
+
+    public int getNumberOfBookedEvents(int type) {
+        int daysToRemove = 0;
+
+        switch (type) {
+            case 1 -> daysToRemove = 7;
+            case 2 -> daysToRemove = 30;
+            case 3 -> daysToRemove = 90;
+            case 4 -> daysToRemove = 180;
+            case 5 -> daysToRemove = 360;
+        }
+
+        LocalDateTime boundary = LocalDateTime.now().minusDays(daysToRemove);
+        System.out.println("booked" + boundary);
+        return eventRepository.countAllWithAtLeastOneTicketBoughtInTheLastTargetDays(boundary);
+    }
+
+    public int getNumberOfActiveEvents() {
+        return eventRepository.countAllByIsActive(true);
+    }
+
+    public int getNumberOfInactiveEvents() {
+        return eventRepository.countAllByIsActive(false);
+    }
+
+    public int getAttendancePercentageForEvent(Long id) {
+        Event event = eventRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(EVENT_DOES_NOT_EXIST));
+
+        return ticketService.getSoldTicketsForEvent(event);
+    }
 }
