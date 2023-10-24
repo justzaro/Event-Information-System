@@ -36,11 +36,6 @@ public class EventController {
                     .body(eventPicture);
     }
 
-//    @GetMapping(path = "/{name}")
-//    public EventDtoResponse getEventByName(@PathVariable("name") String name) {
-//        return eventService.getEvent(name);
-//    }
-
     @GetMapping(path = "/{id}")
     public EventDtoResponse getEventById(@PathVariable("id") Long id) {
         return eventService.getEvent(id);
@@ -81,20 +76,20 @@ public class EventController {
         return eventService.getAttendancePercentageForEvent(eventId);
     }
 
-    @PostMapping(path = "/add")
+    @PostMapping
     public EventDtoResponse addEvent(@RequestPart @Valid EventDto eventDto,
                                      @RequestPart(value = "eventPicture") MultipartFile eventPicture) {
         return eventService.addEvent(eventDto, eventPicture);
     }
 
-    @PutMapping(path = "/update/{eventId}")
-    public EventDtoResponse addArtistsToEvent(@PathVariable("eventId") Long eventId,
-                                              @RequestPart @Valid EventDto eventDto,
-                                              @RequestPart(value = "eventPicture") MultipartFile eventPicture) {
+    @PutMapping(path = "/{eventId}")
+    public EventDtoResponse updateEvent(@PathVariable("eventId") Long eventId,
+                                        @RequestPart @Valid EventDto eventDto,
+                                        @RequestPart(value = "eventPicture") MultipartFile eventPicture) {
         return eventService.updateEvent(eventId, eventDto, eventPicture);
     }
 
-    @DeleteMapping(path = "/delete/{eventId}")
+    @DeleteMapping(path = "/{eventId}")
     public ResponseEntity<Void> deleteEvent(@PathVariable("eventId") Long eventId) {
         eventService.deleteEvent(eventId);
         return ResponseEntity.noContent().build();

@@ -47,12 +47,6 @@ public class UserController {
         return new RedirectView(redirectUrl);
     }
 
-/*    @GetMapping(path = "/confirm")
-    public String confirmToken(@RequestParam String token) {
-        confirmationTokenService.confirmToken(token);
-        String externalUrl = "http://localhost:3000/";
-        RedirectView redirectView = new RedirectView(externalUrl);
-    }*/
     @GetMapping(path = "/{username}")
     public UserDtoResponse getUser(@PathVariable("username") String username) {
         return userService.getUser(username);
@@ -77,20 +71,20 @@ public class UserController {
         return userService.registerUser(userDto);
     }
 
-    @PutMapping(path = "/password/{username}")
+    @PatchMapping(path = "/password/{username}")
     public ResponseEntity<?> changePassword(@PathVariable("username") String username,
                                             @Valid @RequestBody PasswordDto passwordDto) {
         userService.changePassword(username, passwordDto);
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping(path = "/profile-picture/default/{username}")
+    @PatchMapping(path = "/profile-picture/default/{username}")
     public ResponseEntity<?> resetProfilePictureToDefault(@PathVariable("username") String username) {
         userService.resetProfilePictureToDefault(username);
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping(path = "/update/{username}")
+    @PutMapping(path = "/{username}")
     public UserDtoResponse updateUser(@PathVariable("username") String username,
                                       @RequestPart @Valid UserUpdateDto userUpdateDto,
                                       @RequestPart(required = false) MultipartFile profilePicture) {
