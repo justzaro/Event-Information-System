@@ -41,5 +41,6 @@ public class ExceptionMessages {
     public static final String OLD_PASSWORD_MATCHES_NEW_PASSWORD = "Old password matches the new password!";
 
     public static final String WRONG_PASSWORD_EXCEPTION = "Wrong profile password!";
-
+    public static final String ACCOUNT_NOT_ENABLED_EXCEPTION = "You account is not enabled! Please, do so from the link in your email or inform us via the support page!";
+    public static final String ACCOUNT_LOCKED_EXCEPTION = "You account is locked by authorized staff!";
 }

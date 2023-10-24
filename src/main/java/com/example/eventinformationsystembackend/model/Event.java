@@ -1,6 +1,7 @@
 package com.example.eventinformationsystembackend.model;
 
 import com.example.eventinformationsystembackend.common.enums.Currency;
+import com.example.eventinformationsystembackend.common.enums.EventType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -33,6 +34,10 @@ public class Event {
 
     @Column(name = "location", nullable = false)
     private String location;
+
+    @Enumerated(value = EnumType.STRING)
+    @Column(name = "type", nullable = false)
+    private EventType eventType;
 
     @Column(name = "event_picture_name", nullable = false)
     private String eventPictureName;

@@ -1,6 +1,7 @@
 package com.example.eventinformationsystembackend.service;
 
 import com.example.eventinformationsystembackend.common.enums.Currency;
+import com.example.eventinformationsystembackend.common.enums.EventType;
 import com.example.eventinformationsystembackend.dto.ArtistDto;
 import com.example.eventinformationsystembackend.dto.ArtistDtoResponse;
 import com.example.eventinformationsystembackend.dto.EventDto;
@@ -78,6 +79,15 @@ public class EventService {
                .collect(Collectors.toList());
     }
 
+    public List<EventDtoResponse> getAllConcerts() {
+        List<Event> allEvents = eventRepository.findAllByEventType(EventType.CONCERT);
+
+        return allEvents
+                .stream()
+                .map(event -> modelMapper.map(event, EventDtoResponse.class))
+                .collect(Collectors.toList());
+    }
+
     public EventDtoResponse addEvent(EventDto eventDto, MultipartFile eventPicture) {
         if (eventRepository.findEventByName(eventDto.getName()).isPresent()) {
             throw new DuplicateUniqueFieldException(EVENT_NAME_ALREADY_EXISTS);
@@ -109,8 +119,9 @@ public class EventService {
         }
 
         eventToAdd.setEventPicturePath(eventPicturePath);
-        eventToAdd.setIsActive(true);
+        eventToAdd.setIsActive(eventDto.getIsActive());
         eventToAdd.setEventPictureName(eventPicture.getOriginalFilename());
+        eventToAdd.setEventType(eventDto.getEventType());
 
         eventRepository.save(eventToAdd);
 
@@ -134,6 +145,20 @@ public class EventService {
                                               MultipartFile eventPicture) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new ResourceNotFoundException(EVENT_DOES_NOT_EXIST));
+
+        if (!event.getName().equals(eventDto.getName())) {
+            if (eventRepository.findEventByName(event.getName()).isPresent()) {
+                throw new DuplicateUniqueFieldException(EVENT_NAME_ALREADY_EXISTS);
+            }
+        }
+
+        if (eventDto.getStartDate().isAfter(eventDto.getEndDate())) {
+            throw new InvalidEventDateException(START_DATE_IS_AFTER_END_DATE);
+        }
+
+        if (eventDto.getStartDate().isEqual(eventDto.getEndDate())) {
+            throw new InvalidEventDateException(EQUAL_START_AND_END_DATE);
+        }
 
         String oldEventFolderPath = EVENTS_FOLDER_PATH + event.getName();
         String newEventFolderPath = EVENTS_FOLDER_PATH + event.getName();
@@ -167,6 +192,8 @@ public class EventService {
         event.setCurrency(eventDto.getCurrency());
         event.setTicketPrice(eventDto.getTicketPrice());
         event.setCapacity(eventDto.getCapacity());
+        event.setEventType(eventDto.getEventType());
+        event.setIsActive(eventDto.getIsActive());
 
         Set<Artist> artists = eventDto.getArtists()
                 .stream()

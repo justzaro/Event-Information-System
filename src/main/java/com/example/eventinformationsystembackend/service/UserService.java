@@ -1,10 +1,7 @@
 package com.example.eventinformationsystembackend.service;
 
 import com.example.eventinformationsystembackend.common.enums.UserRole;
-import com.example.eventinformationsystembackend.dto.PasswordDto;
-import com.example.eventinformationsystembackend.dto.UserDto;
-import com.example.eventinformationsystembackend.dto.UserDtoResponse;
-import com.example.eventinformationsystembackend.dto.UserUpdateDto;
+import com.example.eventinformationsystembackend.dto.*;
 import com.example.eventinformationsystembackend.exception.*;
 import com.example.eventinformationsystembackend.model.Post;
 import com.example.eventinformationsystembackend.model.User;
@@ -22,6 +19,8 @@ import java.io.File;
 import java.io.IOException;
 
 import java.nio.file.Files;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -52,6 +51,15 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException(USER_DOES_NOT_EXIST));
 
         return modelMapper.map(user, UserDtoResponse.class);
+    }
+
+    public List<UserDtoResponse> getAllUsers() {
+        List<User> users = userRepository.findAll();
+
+        return users
+               .stream()
+               .map(user -> modelMapper.map(user, UserDtoResponse.class))
+               .collect(Collectors.toList());
     }
 
     public UserDtoResponse registerUser(UserDto userDto) {
@@ -97,6 +105,7 @@ public class UserService {
         //user.setPhoneNumber(userDto.getPhoneNumber());
         userToRegister.setDateOfBirth(userDto.getDateOfBirth());
         userToRegister.setAddress(userDto.getAddress());
+        userToRegister.setIsEnabled(true);
 
         userRepository.save(userToRegister);
 
@@ -235,9 +244,20 @@ public class UserService {
         }
     }
 
-    private void checkForDuplicatePhoneNumber(String phoneNumber) {
-        if (userRepository.findUserByPhoneNumber(phoneNumber).isPresent()) {
-            throw new DuplicateUniqueFieldException(PHONE_NUMBER_ALREADY_EXISTS);
-        }
+    public void toggleUserEnabledStatus(String username) {
+        User user = findUser(username);
+        user.setIsEnabled(!user.getIsEnabled());
+        userRepository.save(user);
+    }
+
+    public void toggleUserLockedStatus(String username) {
+        User user = findUser(username);
+        user.setIsLocked(!user.getIsLocked());
+        userRepository.save(user);
+    }
+
+    public User findUser(String username) {
+        return userRepository.findUserByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException(USER_DOES_NOT_EXIST));
     }
 }

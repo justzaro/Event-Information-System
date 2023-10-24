@@ -51,6 +51,11 @@ public class EventController {
         return eventService.getAllEvents();
     }
 
+    @GetMapping("/concerts")
+    public List<EventDtoResponse> getAllConcerts() {
+        return eventService.getAllConcerts();
+    }
+
     @GetMapping("/active")
     public int getNumberOfActiveEvents() {
         return eventService.getNumberOfActiveEvents();
@@ -85,7 +90,7 @@ public class EventController {
     @PutMapping(path = "/update/{eventId}")
     public EventDtoResponse addArtistsToEvent(@PathVariable("eventId") Long eventId,
                                               @RequestPart @Valid EventDto eventDto,
-                                              @RequestPart MultipartFile eventPicture) {
+                                              @RequestPart(value = "eventPicture") MultipartFile eventPicture) {
         return eventService.updateEvent(eventId, eventDto, eventPicture);
     }
 

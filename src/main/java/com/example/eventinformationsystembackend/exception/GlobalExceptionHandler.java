@@ -2,6 +2,8 @@ package com.example.eventinformationsystembackend.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -35,7 +37,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleResourceNotFoundException(ResourceNotFoundException e) {
+    public ResponseEntity<ErrorResponse> handleNotFoundExceptions(ResourceNotFoundException e) {
         ErrorResponse errorResponse = new ErrorResponse();
 
         errorResponse.setStatus(HttpStatus.NOT_FOUND.value());
@@ -45,11 +47,12 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler({DuplicateUniqueFieldException.class,
-                       NotEnoughSeatsException.class,
-                       OldPasswordMatchesNewPassword.class
+    @ExceptionHandler({
+            DuplicateUniqueFieldException.class,
+            OldPasswordMatchesNewPassword.class,
+            NotEnoughSeatsException.class
     })
-    public ResponseEntity<ErrorResponse> handleDuplicateUniqueFieldException(Exception e) {
+    public ResponseEntity<ErrorResponse> handleConflictExceptions(Exception e) {
         ErrorResponse errorResponse = new ErrorResponse();
 
         errorResponse.setStatus(HttpStatus.CONFLICT.value());
@@ -60,17 +63,19 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler({
-            InvalidEventDateException.class,
-            CouponHasExpiredException.class,
-            CouponHasBeenUsedException.class,
-            EmailAlreadyConfirmedException.class,
-            EmptyCartException.class,
             CartItemTicketsExceedEventCapacity.class,
             PostDoesNotContainImageException.class,
+            EmailAlreadyConfirmedException.class,
             OldPasswordFieldsDoNotMatch.class,
-            WrongPasswordException.class
+            CouponHasBeenUsedException.class,
+            InvalidEventDateException.class,
+            CouponHasExpiredException.class,
+            WrongPasswordException.class,
+            EmptyCartException.class,
+            DisabledException.class,
+            LockedException.class
     })
-    public ResponseEntity<ErrorResponse> handleInvalidEventDateException(Exception e) {
+    public ResponseEntity<ErrorResponse> handleBadRequestExceptions(Exception e) {
         ErrorResponse errorResponse = new ErrorResponse();
 
         errorResponse.setStatus(HttpStatus.BAD_REQUEST.value());

@@ -34,8 +34,10 @@ public class SecurityConfiguration {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/users/confirm","/users/profile-picture/*", "/posts/picture/*", "/users/register", "/tickets/verification/*").permitAll()
-                        .requestMatchers("/events", "/events/{id:\\d+}", "events/event-picture/{id:.+}").permitAll()
+                        .requestMatchers("/auth/**", "/posts/picture/*", "/tickets/verification/*").permitAll()
+                        .requestMatchers("/users", "/users/confirm", "/users/profile-picture/*", "/users/register").permitAll()
+                        .requestMatchers("/events", "/events/{id:\\d+}", "events/event-picture/{id:.+}", "events/concerts").permitAll()
+                        .requestMatchers("/artists").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)

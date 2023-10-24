@@ -10,12 +10,14 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.MediaType;
 import org.springframework.web.servlet.view.RedirectView;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping(path = "/users")
@@ -51,10 +53,14 @@ public class UserController {
         String externalUrl = "http://localhost:3000/";
         RedirectView redirectView = new RedirectView(externalUrl);
     }*/
-
     @GetMapping(path = "/{username}")
     public UserDtoResponse getUser(@PathVariable("username") String username) {
         return userService.getUser(username);
+    }
+
+    @GetMapping
+    public List<UserDtoResponse> getAllUsers() {
+        return userService.getAllUsers();
     }
 
     @GetMapping(path = "/profile-picture/{username}")
@@ -64,6 +70,11 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.valueOf("image/png"))
                 .body(profilePicture);
+    }
+
+    @PostMapping(path = "/register")
+    public UserDtoResponse registerUser(@RequestBody @Valid UserDto userDto) {
+        return userService.registerUser(userDto);
     }
 
     @PutMapping(path = "/password/{username}")
@@ -79,11 +90,6 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping(path = "/register")
-    public UserDtoResponse registerUser(@RequestBody @Valid UserDto userDto) {
-        return userService.registerUser(userDto);
-    }
-
     @PutMapping(path = "/update/{username}")
     public UserDtoResponse updateUser(@PathVariable("username") String username,
                                       @RequestPart @Valid UserUpdateDto userUpdateDto,
@@ -91,7 +97,22 @@ public class UserController {
         return userService.updateUser(userUpdateDto, username, profilePicture);
     }
 
-    @DeleteMapping(path = "/delete/{username}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/{username}/enabled")
+    public ResponseEntity<Void> toggleUserEnabledStatus(@PathVariable("username") String username) {
+        userService.toggleUserEnabledStatus(username);
+        return ResponseEntity.ok().build();
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/{username}/locked")
+    public ResponseEntity<Void> toggleUserLockedStatus(@PathVariable("username") String username) {
+        userService.toggleUserLockedStatus(username);
+        return ResponseEntity.ok().build();
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping(path = "/{username}")
     public ResponseEntity<Void> deleteUser(@PathVariable("username") String username) {
         userService.deleteUser(username);
         return ResponseEntity.noContent().build();
