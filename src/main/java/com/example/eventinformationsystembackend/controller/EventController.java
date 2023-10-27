@@ -1,5 +1,6 @@
 package com.example.eventinformationsystembackend.controller;
 
+import com.example.eventinformationsystembackend.common.enums.EventType;
 import com.example.eventinformationsystembackend.dto.*;
 import com.example.eventinformationsystembackend.service.EventService;
 import jakarta.validation.Valid;
@@ -42,14 +43,15 @@ public class EventController {
     }
 
     @GetMapping
-    public List<EventDtoResponse> getAllEvents() {
-        return eventService.getAllEvents();
+    public List<EventDtoResponse> getAllEvents(
+            @RequestParam(value = "type", required = false) EventType type) {
+        return eventService.getAllEvents(type);
     }
 
-    @GetMapping("/concerts")
-    public List<EventDtoResponse> getAllConcerts() {
-        return eventService.getAllConcerts();
-    }
+//    @GetMapping("/concerts")
+//    public List<EventDtoResponse> getAllConcerts() {
+//        return eventService.getAllConcerts();
+//    }
 
     @GetMapping("/active")
     public int getNumberOfActiveEvents() {
@@ -89,9 +91,10 @@ public class EventController {
         return eventService.updateEvent(eventId, eventDto, eventPicture);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping(path = "/{eventId}")
     public ResponseEntity<Void> deleteEvent(@PathVariable("eventId") Long eventId) {
         eventService.deleteEvent(eventId);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().build();
     }
 }

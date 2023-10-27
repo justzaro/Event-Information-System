@@ -75,9 +75,9 @@ public class Event {
     )
     private Set<Artist> artists;
 
-    @OneToMany(mappedBy = "event")
+    @OneToMany(mappedBy = "event", cascade = CascadeType.REMOVE)
     private List<CartItem> cartItems;
 
-    @OneToMany(mappedBy = "event")
+    @OneToMany(mappedBy = "event", cascade = CascadeType.REMOVE)
     private List<Ticket> tickets;
 }

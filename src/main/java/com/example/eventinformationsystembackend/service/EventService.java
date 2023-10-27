@@ -70,8 +70,14 @@ public class EventService {
         return modelMapper.map(event, EventDtoResponse.class);
     }
 
-    public List<EventDtoResponse> getAllEvents() {
-        List<Event> allEvents = eventRepository.findAll();
+    public List<EventDtoResponse> getAllEvents(EventType type) {
+        List<Event> allEvents;
+
+        if (type == null) {
+            allEvents = eventRepository.findAll();
+        } else {
+            allEvents = eventRepository.findAllByEventType(type);
+        }
 
         return allEvents
                .stream()
@@ -87,6 +93,16 @@ public class EventService {
                 .map(event -> modelMapper.map(event, EventDtoResponse.class))
                 .collect(Collectors.toList());
     }
+
+    public List<EventDtoResponse> getAllEventsByType(EventType type) {
+        List<Event> allEvents = eventRepository.findAllByEventType(type);
+
+        return allEvents
+                .stream()
+                .map(event -> modelMapper.map(event, EventDtoResponse.class))
+                .collect(Collectors.toList());
+    }
+
 
     public EventDtoResponse addEvent(EventDto eventDto, MultipartFile eventPicture) {
         if (eventRepository.findEventByName(eventDto.getName()).isPresent()) {

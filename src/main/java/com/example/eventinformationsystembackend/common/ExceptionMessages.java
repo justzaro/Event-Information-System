@@ -16,6 +16,7 @@ public class ExceptionMessages {
     public static final String COUPON_IS_INVALID = "Invalid coupon code!";
     public static final String COUPON_HAS_EXPIRED = "Coupon code has expired!";
     public static final String COUPON_HAS_BEEN_USED = "Coupon has already been used!";
+    public static final String COUPON_DOES_NOT_EXIST = "Coupon with this ID does not exist!";
 
     public static final String POST_DOES_NOT_CONTAIN_IMAGE = "You must add an image to your post before you upload it!";
 
