@@ -2,7 +2,9 @@ package com.example.eventinformationsystembackend.service;
 
 import com.example.eventinformationsystembackend.dto.EventDtoResponse;
 import com.example.eventinformationsystembackend.dto.OrderItemDtoResponse;
+import com.example.eventinformationsystembackend.dto.SupportTicketDtoResponse;
 import com.example.eventinformationsystembackend.dto.TicketDtoResponse;
+import com.example.eventinformationsystembackend.model.SupportTicket;
 import com.example.eventinformationsystembackend.model.User;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.InternetAddress;
@@ -91,6 +93,44 @@ public class EmailService {
                 String attachmentName = "Ticket-" + (i + 1) + "-" + tickets.get(i).getEvent().getName();
                 helper.addAttachment(attachmentName, new File(ticketsPdfPaths.get(i)));
             }
+
+            mailSender.send(mimeMessage);
+        } catch (MessagingException e) {
+            throw new IllegalStateException("failed to send email");
+        }
+    }
+
+    @Async
+    public void sendSupportTicketReceivedEmail(String receiverEmail,
+                                               String text) {
+        try {
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper =
+                    new MimeMessageHelper(mimeMessage, "utf-8");
+
+            helper.setText(text, true);
+            helper.setTo(receiverEmail);
+            helper.setSubject("Support Ticket Received!");
+            helper.setFrom("event-information@gmail.com");
+
+            mailSender.send(mimeMessage);
+        } catch (MessagingException e) {
+            throw new IllegalStateException("failed to send email");
+        }
+    }
+
+    @Async
+    public void sendSupportTicketResponseEmail(String receiverEmail,
+                                               String text) {
+        try {
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper =
+                    new MimeMessageHelper(mimeMessage, "utf-8");
+
+            helper.setText(text, true);
+            helper.setTo(receiverEmail);
+            helper.setSubject("Support Ticket Response!");
+            helper.setFrom("event-information@gmail.com");
 
             mailSender.send(mimeMessage);
         } catch (MessagingException e) {

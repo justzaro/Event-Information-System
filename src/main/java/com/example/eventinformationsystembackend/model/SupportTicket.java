@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -44,4 +45,7 @@ public class SupportTicket {
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false)
     private User user;
+
+    @OneToMany(mappedBy = "supportTicket", cascade = CascadeType.REMOVE)
+    public List<SupportTicketReply> supportTicketReplies;
 }

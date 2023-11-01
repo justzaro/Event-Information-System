@@ -23,8 +23,6 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
                        WHERE n BETWEEN 0 AND :days - 1
                    ) ds
                    LEFT JOIN tickets t ON CAST(t.created_at AS DATE) = ds.Date
-                   WHERE ds.Date >= NOW() - INTERVAL :days DAY
-                   AND ds.Date < NOW()
                    GROUP BY ds.Date
                    ORDER BY ds.Date;
                    """,

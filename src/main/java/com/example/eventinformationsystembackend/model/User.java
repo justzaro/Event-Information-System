@@ -71,7 +71,8 @@ public class User implements UserDetails {
     @Column(name = "is_enabled", nullable = false, columnDefinition = "TINYINT(1) DEFAULT FALSE")
     private Boolean isEnabled;
 
-    @Column(name = "profile_picture_name", columnDefinition = "TEXT")
+//    @Column(name = "profile_picture_name", columnDefinition = "TEXT")
+    @Column(name = "profile_picture_name")
     private String profilePictureName;
 
     @OneToMany(mappedBy = "user")
@@ -91,6 +92,9 @@ public class User implements UserDetails {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     private List<CartItem> cartItems;
+
+    @OneToMany(mappedBy = "replier")
+    private List<SupportTicketReply> supportTicketReply;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

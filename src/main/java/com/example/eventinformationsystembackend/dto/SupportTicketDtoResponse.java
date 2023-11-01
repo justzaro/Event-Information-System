@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -37,4 +38,6 @@ public class SupportTicketDtoResponse {
 
     @JsonFormat(pattern = "HH:mm dd-MM-yyyy")
     private LocalDateTime createdAt;
+
+    private List<SupportTicketReplyDtoResponse> supportTicketReplies;
 }
