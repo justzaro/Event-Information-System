@@ -348,4 +348,120 @@ public class EmailTexts {
                         </body>
                         </html>
                         """;
+    public static final String SUPPORT_TICKET_RECEIVED_TEMPLATE
+            = """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>Support Ticket Acknowledgment</title>
+                <style>
+                    body {
+                        font-family: Tahoma, Arial, sans-serif;
+                    }
+                    .container {
+                        max-width: 600px;
+                        margin: 20px auto;
+                        padding: 20px;
+                        background-color: #ffffff;
+                        border-radius: 5px;
+                        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                        font-size: 130%%;
+                    }
+                    h1 {
+                        text-align: center;
+                        font-size: 30px;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <h1>Support Ticket Received!</h1>
+                    <br>
+                    <p>Dear %s,</p>
+                            
+                    <p>Thank you for contacting us with your support request. We have received your support ticket and appreciate your trust in us.</p>
+                            
+                    <p>Here are the details of your support ticket:</p>
+                            
+                    <hr>
+                            
+                    <p><b>Ticket ID:</b> %s</p>
+                    <p><b>Subject:</b> %s</p>
+                    <p><b>Description:</b> %s</p>
+                    <p><b>Customer Name:</b> %s %s</p>
+                    <p><b>Customer Email:</b> %s</p>
+                    <p><b>Customer Phone Number:</b> %s</p>
+                    <p><b>Created At:</b> %s</p>
+                            
+                    <hr>
+                            
+                    <p>We have received your request and our team is currently reviewing it. Our goal is to provide you with a prompt and helpful solution. You can expect a response from us soon.</p>
+                            
+                    <p>If you have any further questions or need additional assistance, please don't hesitate to contact us via the support ticket page or reply to this email.</p>
+                            
+                    <br>
+                            
+                    <p>Thank you for choosing us!</p>
+                    <p>Best regards,</p>
+                    <p>The <b>Ticket Master</b> Team</p>
+                </div>
+            </body>
+            </html>
+                        
+            """;
+
+    public static String SUPPORT_TICKET_RESPONSE_TEMPLATE =
+            """
+                            <!DOCTYPE html>
+                                   <html>
+                                   <head>
+                                       <meta charset="UTF-8">
+                                       <title>Support Ticket Response</title>
+                                       <style>
+                                           body {
+                                               font-family: Tahoma, Arial, sans-serif;
+                                           }
+                                           .container {
+                                               max-width: 600px;
+                                               margin: 20px auto;
+                                               padding: 20px;
+                                               background-color: #ffffff;
+                                               border-radius: 5px;
+                                               box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                                               font-size: 130%%;
+                                           }
+                                           h1 {
+                                             text-align: center;
+                                             font-size: 30px;
+                                           }
+                                       </style>
+                                   </head>
+                                   <body>
+                                       <div class="container">
+                                           <h1>Support Ticket Response!</h1>
+                                           <br>
+                                           <p>Dear %s,</p>
+                                   
+                                           <p>Thank you for reaching out to us with your support ticket. We appreciate your patience as we strive to provide the best possible assistance to our valued customers.</p>
+                                   
+                                           <p>Your support ticket with <b>ID</b> [%s], created on <b>[%s]</b>, has been reviewed, and here's our response:</p>
+                                   
+                                           <hr>
+                                   
+                                           <p>%s</p>
+                                   
+                                           <hr>
+                                   
+                                           <p>If you have any further questions or need additional assistance, please don't hesitate to contact us via the support ticket page or reply to this email.</p>
+                                   
+                                           <br>
+                                   
+                                           <p>Thank you for choosing us!</p>
+                                           <p>Best regards,</p>
+                                           <p>The <b>Support Team</b></p>
+                                       </div>
+                                   </body>
+                                   </html>     
+                    """;
 }

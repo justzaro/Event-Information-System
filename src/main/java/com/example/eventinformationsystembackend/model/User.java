@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,6 +16,8 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+
+import static com.example.eventinformationsystembackend.common.ExceptionMessages.*;
 
 @Entity
 @Getter
@@ -67,7 +71,8 @@ public class User implements UserDetails {
     @Column(name = "is_enabled", nullable = false, columnDefinition = "TINYINT(1) DEFAULT FALSE")
     private Boolean isEnabled;
 
-    @Column(name = "profile_picture_name", columnDefinition = "TEXT")
+//    @Column(name = "profile_picture_name", columnDefinition = "TEXT")
+    @Column(name = "profile_picture_name")
     private String profilePictureName;
 
     @OneToMany(mappedBy = "user")
@@ -88,9 +93,12 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     private List<CartItem> cartItems;
 
+    @OneToMany(mappedBy = "replier")
+    private List<SupportTicketReply> supportTicketReply;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(userRole.name()));
+        return List.of(new SimpleGrantedAuthority("ROLE_" + userRole.name()));
     }
 
     @Override
@@ -100,6 +108,10 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
+        if (!isLocked) {
+            throw new LockedException(ACCOUNT_LOCKED_EXCEPTION);
+        }
+
         return true;
     }
 
@@ -110,6 +122,10 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
+        if (!isEnabled) {
+            throw new DisabledException(ACCOUNT_NOT_ENABLED_EXCEPTION);
+        }
+
         return true;
     }
 }

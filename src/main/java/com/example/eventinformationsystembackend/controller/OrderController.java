@@ -48,4 +48,9 @@ public class OrderController {
     public List<OrderItemDtoResponse> getOrderItems(@PathVariable("orderId") Long id) {
         return orderItemService.getOrderItems(id);
     }
+
+    @GetMapping("/prices/last/{ordersCount}")
+    public List<Integer> getPricesOfLastThirtyOrders(@PathVariable("ordersCount") int ordersCount) {
+        return orderService.getPricesOfLastSelectedOrders(ordersCount);
+    }
 }

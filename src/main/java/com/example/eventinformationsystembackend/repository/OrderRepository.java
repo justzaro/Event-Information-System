@@ -22,4 +22,13 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     int getTicketsBoughtForEvent(@Param("eventId") Long eventId);
 
     List<Order> findAllByUser(User user);
+
+    @Query(value = """
+               SELECT orders.total_price
+               FROM orders
+               ORDER BY date_of_order DESC
+               LIMIT :ordersCountLimit
+               """,
+            nativeQuery = true)
+    List<Integer> findPricesOfLastSelectedOrders(@Param("ordersCountLimit") Integer ordersCountLimit);
 }

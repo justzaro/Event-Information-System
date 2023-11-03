@@ -169,4 +169,8 @@ public class OrderService {
 
         return totalPrice - (totalPrice * discountPercentage);
     }
+
+    public List<Integer> getPricesOfLastSelectedOrders(int ordersCount) {
+        return orderRepository.findPricesOfLastSelectedOrders(ordersCount);
+    }
 }

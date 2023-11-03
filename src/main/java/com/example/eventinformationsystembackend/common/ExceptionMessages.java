@@ -16,6 +16,8 @@ public class ExceptionMessages {
     public static final String COUPON_IS_INVALID = "Invalid coupon code!";
     public static final String COUPON_HAS_EXPIRED = "Coupon code has expired!";
     public static final String COUPON_HAS_BEEN_USED = "Coupon has already been used!";
+    public static final String COUPON_DOES_NOT_EXIST = "Coupon with this ID does not exist!";
+    public static final String SUPPORT_TICKET_NOT_EXIST = "Support ticket with this ID does not exist!";
 
     public static final String POST_DOES_NOT_CONTAIN_IMAGE = "You must add an image to your post before you upload it!";
 
@@ -41,5 +43,6 @@ public class ExceptionMessages {
     public static final String OLD_PASSWORD_MATCHES_NEW_PASSWORD = "Old password matches the new password!";
 
     public static final String WRONG_PASSWORD_EXCEPTION = "Wrong profile password!";
-
+    public static final String ACCOUNT_NOT_ENABLED_EXCEPTION = "You account is not enabled! Please, do so from the link in your email or inform us via the support page!";
+    public static final String ACCOUNT_LOCKED_EXCEPTION = "You account is locked by authorized staff!";
 }

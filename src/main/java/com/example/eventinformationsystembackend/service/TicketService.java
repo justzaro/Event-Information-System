@@ -130,6 +130,13 @@ public class TicketService {
 
             order.getOrderItems().add(createdOrderedItem);
         }
+    }
 
+    public List<Integer> getSoldTicketsCountPerDayForTheLastSelectedDays(int days) {
+        return ticketRepository.findSoldTicketsCountPerDayForTheLastSelectedDays(days);
+    }
+
+    public int getSoldTicketsForEvent(Event event) {
+        return ticketRepository.countAllByEvent(event);
     }
 }

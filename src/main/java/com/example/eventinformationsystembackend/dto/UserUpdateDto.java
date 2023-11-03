@@ -33,6 +33,9 @@ public class UserUpdateDto {
     @Size(max = 255)
     private String email;
 
+    @Size(max = 255)
+    private String password;
+
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate dateOfBirth;
 

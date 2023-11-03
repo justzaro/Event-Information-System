@@ -2,6 +2,7 @@ package com.example.eventinformationsystembackend.service;
 
 import com.example.eventinformationsystembackend.dto.EventDtoResponse;
 import com.example.eventinformationsystembackend.dto.OrderItemDtoResponse;
+import com.example.eventinformationsystembackend.dto.SupportTicketDtoResponse;
 import com.example.eventinformationsystembackend.dto.TicketDtoResponse;
 import com.example.eventinformationsystembackend.model.*;
 import com.google.zxing.BarcodeFormat;
@@ -272,5 +273,29 @@ public class GenerationService {
         }
 
         return outputPdfFilePath;
+    }
+
+    public String generateSupportTicketReceivedTemplate(SupportTicket supportTicket,
+                                                        User user) {
+        return String.format(SUPPORT_TICKET_RECEIVED_TEMPLATE,
+                      user.getFirstName(),
+                      supportTicket.getId(),
+                      supportTicket.getSubject(),
+                      supportTicket.getDescription(),
+                      supportTicket.getCustomerFirstName(), supportTicket.getCustomerLastName(),
+                      supportTicket.getCustomerEmail(),
+                      supportTicket.getCustomerPhoneNumber(),
+                      supportTicket.getCreatedAt()
+        );
+    }
+
+    public String generateSupportTicketResponseTemplate(SupportTicketReply supportTicketReply,
+                                                        User user) {
+        return String.format(SUPPORT_TICKET_RESPONSE_TEMPLATE,
+                user.getFirstName(),
+                supportTicketReply.getId(),
+                supportTicketReply.getCreatedAt(),
+                supportTicketReply.getText()
+        );
     }
 }

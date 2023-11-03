@@ -1,6 +1,8 @@
 package com.example.eventinformationsystembackend.dto;
 
 import com.example.eventinformationsystembackend.common.enums.Currency;
+import com.example.eventinformationsystembackend.common.enums.EventType;
+import com.example.eventinformationsystembackend.common.enums.UserRole;
 import com.example.eventinformationsystembackend.model.Artist;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
@@ -30,6 +32,8 @@ public class EventDtoResponse {
 
     @NotBlank
     private String location;
+
+    private EventType eventType;
 
     @JsonFormat(pattern = "HH:mm dd/MM/yyyy")
     private LocalDateTime startDate;
