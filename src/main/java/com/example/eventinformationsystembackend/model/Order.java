@@ -46,6 +46,6 @@ public class Order {
     @JoinColumn(name = "coupon_id", referencedColumnName = "coupon_id")
     private Coupon coupon;
 
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order", cascade = CascadeType.REMOVE)
     private List<OrderItem> orderItems;
 }

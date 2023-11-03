@@ -30,7 +30,7 @@ public class CartItemController {
     @GetMapping(path = "/coupon/{username}")
     public Double applyCoupon(@PathVariable("username") String username,
                               @RequestParam(value = "couponCode") String couponCode) {
-        return orderService.getCartItemsTotalPriceWithCoupon(username, couponCode);
+        return orderService.getCouponDiscount(username, couponCode);
     }
 
     @GetMapping("/number/{username}")

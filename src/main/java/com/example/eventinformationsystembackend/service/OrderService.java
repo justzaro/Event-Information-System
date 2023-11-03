@@ -93,16 +93,24 @@ public class OrderService {
         return totalPrice;
     }
 
-    public Double getCartItemsTotalPriceWithCoupon(String username, String couponCode) {
+//    public Double getCartItemsTotalPriceWithCoupon(String username, String couponCode) {
+//        if (userRepository.findUserByUsername(username).isEmpty()) {
+//            throw new ResourceNotFoundException(USER_DOES_NOT_EXIST);
+//        }
+//        Coupon coupon = couponService.validateCoupon(couponCode);
+//
+//        double totalPrice = getCartItemsTotalPriceWithoutCoupon(username);
+//        double discount = coupon.getDiscountPercentage() / 100;
+//
+//        return totalPrice - (totalPrice * discount);
+//    }
+    public Double getCouponDiscount(String username, String couponCode) {
         if (userRepository.findUserByUsername(username).isEmpty()) {
             throw new ResourceNotFoundException(USER_DOES_NOT_EXIST);
         }
         Coupon coupon = couponService.validateCoupon(couponCode);
 
-        double totalPrice = getCartItemsTotalPriceWithoutCoupon(username);
-        double discount = coupon.getDiscountPercentage() / 100;
-
-        return totalPrice - (totalPrice * discount);
+        return coupon.getDiscountPercentage();
     }
 
     public void createOrder(String username, String couponCode) {
