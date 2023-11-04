@@ -33,7 +33,7 @@ public class UserController {
         this.confirmationTokenService = confirmationTokenService;
     }
 
-    @GetMapping(path = "/confirm")
+    @GetMapping(path = "/confirmation")
     public RedirectView confirmToken(@RequestParam String token) {
         String confirmationStatus = "success";
 
@@ -47,14 +47,14 @@ public class UserController {
         return new RedirectView(redirectUrl);
     }
 
-    @GetMapping(path = "/{username}")
-    public UserDtoResponse getUser(@PathVariable("username") String username) {
-        return userService.getUser(username);
-    }
-
     @GetMapping
     public List<UserDtoResponse> getAllUsers() {
         return userService.getAllUsers();
+    }
+
+    @GetMapping(path = "/{username}")
+    public UserDtoResponse getUser(@PathVariable("username") String username) {
+        return userService.getUser(username);
     }
 
     @GetMapping(path = "/profile-picture/{username}")
@@ -66,7 +66,7 @@ public class UserController {
                 .body(profilePicture);
     }
 
-    @PostMapping(path = "/register")
+    @PostMapping
     public UserDtoResponse registerUser(@RequestBody @Valid UserDto userDto) {
         return userService.registerUser(userDto);
     }

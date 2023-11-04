@@ -50,23 +50,17 @@ public class PostController {
                 .body(postPicture);
     }
 
-    @PostMapping(path = "/add/{username}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(path = "/{username}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public PostDtoResponse addPost(@PathVariable("username") String username,
                                    @RequestPart("postDto") @Valid PostDto postDto,
                                    @RequestPart("postPicture") MultipartFile postPicture) {
         return postService.addPost(postDto, postPicture, username);
     }
 
-    @DeleteMapping(path = "/self/{postId}/{username}")
+    @DeleteMapping(path = "/{postId}/{username}")
     public ResponseEntity<Void> deleteOwnedPost(@PathVariable("postId") Long postId,
                                                 @PathVariable("username") String username) {
-        postService.deleteOwnedPost(postId, username);
-        return ResponseEntity.noContent().build();
-    }
-
-    @DeleteMapping(path = "/delete/{postId}")
-    public ResponseEntity<Void> deletePost(@PathVariable("postId") Long postId) {
-        postService.deletePost(postId);
+        postService.deletePost(postId, username);
         return ResponseEntity.noContent().build();
     }
 }

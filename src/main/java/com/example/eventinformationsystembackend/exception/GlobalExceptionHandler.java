@@ -2,6 +2,7 @@ package com.example.eventinformationsystembackend.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -70,6 +71,7 @@ public class GlobalExceptionHandler {
             CouponHasBeenUsedException.class,
             InvalidEventDateException.class,
             CouponHasExpiredException.class,
+            BadCredentialsException.class,
             WrongPasswordException.class,
             EmptyCartException.class,
             DisabledException.class,
@@ -84,6 +86,15 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
-    //add resource not found exception, then make more normal exception
-    //ie usernotfound which implement it
+
+    @ExceptionHandler({ForbiddenException.class})
+    public ResponseEntity<ErrorResponse> handleForbiddenException(Exception e) {
+        ErrorResponse errorResponse = new ErrorResponse();
+
+        errorResponse.setStatus(HttpStatus.FORBIDDEN.value());
+        errorResponse.setMessage(e.getMessage());
+        errorResponse.setTimestamp(LocalDateTime.now());
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
+    }
 }

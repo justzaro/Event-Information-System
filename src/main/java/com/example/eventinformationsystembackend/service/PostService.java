@@ -1,7 +1,9 @@
 package com.example.eventinformationsystembackend.service;
 
+import com.example.eventinformationsystembackend.common.enums.UserRole;
 import com.example.eventinformationsystembackend.dto.PostDto;
 import com.example.eventinformationsystembackend.dto.PostDtoResponse;
+import com.example.eventinformationsystembackend.exception.ForbiddenException;
 import com.example.eventinformationsystembackend.exception.PostDoesNotContainImageException;
 import com.example.eventinformationsystembackend.exception.ResourceNotFoundException;
 import com.example.eventinformationsystembackend.model.Comment;
@@ -83,24 +85,17 @@ public class PostService {
         return modelMapper.map(postRepository.save(postToAdd), PostDtoResponse.class);
     }
 
-    public void deleteOwnedPost(Long postId, String username) {
+    public void deletePost(Long postId, String username) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException(POST_DOES_NOT_EXIST));
 
         User user = userRepository.findUserByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException(USER_DOES_NOT_EXIST));
 
-        //add equals method for User object
-        if (!post.getUser().getUsername().equals(user.getUsername())) {
-            throw new  IllegalStateException("post now owned by user");
+        if (!post.getUser().getUsername().equals(username)
+                || !user.getUserRole().equals(UserRole.ADMIN)) {
+            throw new ForbiddenException(RESOURCE_ACCESS_FORBIDDEN);
         }
-
-        postRepository.delete(post);
-    }
-
-    public void deletePost(Long postId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException(POST_DOES_NOT_EXIST));
 
         postRepository.delete(post);
     }

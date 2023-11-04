@@ -25,7 +25,7 @@ public class ArtistController {
         return artistService.getAllArtists();
     }
 
-    @PostMapping(path = "/add")
+    @PostMapping
     public ArtistDtoResponse addArtist(@RequestPart @Valid ArtistDto artistDto,
                                        @RequestPart MultipartFile profilePicture) {
         return artistService.addArtist(artistDto, profilePicture);

@@ -37,7 +37,7 @@ public class OrderController {
         return orderService.getAllOrdersForUsers(username);
     }
 
-    @PostMapping(path = "/create/{username}")
+    @PostMapping(path = "/{username}")
     public void createOrder(@PathVariable("username") String username,
                             @PathParam("couponCode") String couponCode) {
         orderService.createOrder(username, couponCode);

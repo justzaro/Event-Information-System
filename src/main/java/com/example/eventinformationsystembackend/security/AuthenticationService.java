@@ -22,6 +22,7 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
 
     public AuthenticationResponse authenticate(AuthenticationRequest authenticationRequest) {
+
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         authenticationRequest.getUsername(),
