@@ -37,10 +37,4 @@ public class TicketController {
     public List<Integer> getSoldTicketsCountPerDayForTheThirtyDays(@PathVariable("days") int days) {
         return ticketService.getSoldTicketsCountPerDayForTheLastSelectedDays(days);
     }
-/*    @GetMapping(path = "/verification/{ticketCode}")
-    public RedirectView verifyTicket(@PathVariable("ticketCode") String ticketCode) {
-        String externalUrl = "https://www.google.com/";
-        RedirectView redirectView = new RedirectView(externalUrl);
-        return redirectView;
-    }*/
 }

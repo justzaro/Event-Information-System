@@ -3,7 +3,6 @@ package com.example.eventinformationsystembackend.service;
 import com.example.eventinformationsystembackend.common.enums.UserRole;
 import com.example.eventinformationsystembackend.dto.*;
 import com.example.eventinformationsystembackend.exception.*;
-import com.example.eventinformationsystembackend.model.Post;
 import com.example.eventinformationsystembackend.model.User;
 import com.example.eventinformationsystembackend.repository.UserRepository;
 
@@ -14,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import static com.example.eventinformationsystembackend.common.ExceptionMessages.*;
 import static com.example.eventinformationsystembackend.common.FilePaths.*;
+import static com.example.eventinformationsystembackend.common.UserInformation.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserService {
-    private final String CONFIRMATION_LINK = "http://localhost:8080/users/confirm?token=";
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
     private final ConfirmationTokenService confirmationTokenService;
@@ -66,46 +65,28 @@ public class UserService {
         checkForDuplicateUsername(userDto.getUsername());
         checkForDuplicateEmail(userDto.getEmail());
 
-/*        if (userDto.getPhoneNumber() != null) {
-            if (!userDto.getPhoneNumber().isEmpty()) {
-                checkForDuplicatePhoneNumber(userDto.getPhoneNumber());
-            }
-        }*/
-
         User userToRegister = modelMapper.map(userDto, User.class);
 
         String userFolderPath = USERS_FOLDER_PATH + userToRegister.getUsername();
         String userPostsFolderPath = userFolderPath + "\\" + "Posts";
-//        String userProfilePicturePath = userFolderPath + "\\" + profilePicture.getOriginalFilename();
-        String userProfilePicturePath = DEFAULT_USER_PROFILE_PICTURE;
-
 
         userToRegister.setUserRole(UserRole.USER);
         userToRegister.setIsEnabled(false);
         userToRegister.setIsLocked(false);
-        userToRegister.setProfilePicturePath(userProfilePicturePath);
-        userToRegister.setProfilePictureName("default_user_profile_picture.png");
+        userToRegister.setProfilePicturePath(DEFAULT_USER_PROFILE_PICTURE);
+        userToRegister.setProfilePictureName(DEFAULT_USER_PROFILE_PICTURE_NAME);
 
         storageService.createFolder(userFolderPath);
         storageService.createFolder(userPostsFolderPath);
-
-//        if (profilePicture != null) {
-//            if (!profilePicture.isEmpty()) {
-//                userToRegister.setProfilePicturePath(userProfilePicturePath);
-//                userToRegister.setProfilePictureName(profilePicture.getOriginalFilename());
-//                storageService.savePictureToFileSystem(profilePicture, userProfilePicturePath);
-//            }
-//        }
 
         userToRegister.setFirstName(userDto.getFirstName());
         userToRegister.setLastName(userDto.getLastName());
         userToRegister.setUsername(userDto.getUsername());
         userToRegister.setPassword(userDto.getPassword());
         userToRegister.setEmail(userDto.getEmail());
-        //user.setPhoneNumber(userDto.getPhoneNumber());
         userToRegister.setDateOfBirth(userDto.getDateOfBirth());
         userToRegister.setAddress(userDto.getAddress());
-        userToRegister.setIsEnabled(true);
+        userToRegister.setIsEnabled(false);
 
         userRepository.save(userToRegister);
 
@@ -141,10 +122,6 @@ public class UserService {
             newUserFolderPath = USERS_FOLDER_PATH + userUpdateDto.getUsername();
             storageService.renameFolder(currentUserFolderPath, newUserFolderPath);
 
-//            if (user.getProfilePicturePath() != null) {
-//                String newUserProfilePicturePath = newUserFolderPath + "\\" + user.getProfilePictureName();
-//                user.setProfilePicturePath(newUserProfilePicturePath);
-//            }
             if (profilePicture != null) {
                 String newUserProfilePicturePath = newUserFolderPath + "\\" + user.getProfilePictureName();
                 user.setProfilePicturePath(newUserProfilePicturePath);
@@ -157,12 +134,6 @@ public class UserService {
         if (!user.getEmail().equals(userUpdateDto.getEmail())) {
             checkForDuplicateEmail(userUpdateDto.getEmail());
         }
-
-/*        if (userDto.getPhoneNumber() != null) {
-            if (!user.getPhoneNumber().equals(userDto.getPhoneNumber())) {
-                checkForDuplicatePhoneNumber(userDto.getPhoneNumber());
-            }
-        }*/
 
         if (profilePicture != null && !profilePicture.isEmpty()) {
             if (user.getProfilePicturePath() != null
@@ -182,12 +153,9 @@ public class UserService {
         user.setFirstName(userUpdateDto.getFirstName());
         user.setLastName(userUpdateDto.getLastName());
         user.setUsername(userUpdateDto.getUsername());
-        //user.setPassword(userDto.getPassword());
         user.setEmail(userUpdateDto.getEmail());
-        //user.setPhoneNumber(userDto.getPhoneNumber());
         user.setDateOfBirth(userUpdateDto.getDateOfBirth());
         user.setAddress(userUpdateDto.getAddress());
-        //user.setDescription(userDto.getDescription());
 
         User updatedUser = userRepository.save(user);
 

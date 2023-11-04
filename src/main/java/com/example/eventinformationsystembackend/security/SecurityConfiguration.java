@@ -35,7 +35,7 @@ public class SecurityConfiguration {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**", "/posts/picture/*", "/tickets/verification/*").permitAll()
-                        .requestMatchers("/users", "/users/confirm", "/users/profile-picture/*", "/users/register").permitAll()
+                        .requestMatchers("/users", "/users/confirmation", "/users/profile-picture/*", "/users/register").permitAll()
                         .requestMatchers("/events", "/events/{id:\\d+}", "events/event-picture/{id:.+}", "events/concerts").permitAll()
                         .requestMatchers("/artists").permitAll()
                         .anyRequest().authenticated())

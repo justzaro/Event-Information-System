@@ -108,7 +108,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        if (!isLocked) {
+        if (isLocked) {
             throw new LockedException(ACCOUNT_LOCKED_EXCEPTION);
         }
 

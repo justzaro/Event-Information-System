@@ -9,8 +9,7 @@ public class ExceptionMessages {
     public static final String COMMENT_DOES_NOT_EXIST = "Comment with this ID does not exist!";
     public static final String TICKET_DOES_NOT_EXIST = "Ticket with this code does not exist!";
 
-
-
+    public static final String RESOURCE_ACCESS_FORBIDDEN = "Access to this resource is forbidden!";
     public static final String ORDER_DOES_NOT_EXIST = "Order with this ID does not exist!";
 
     public static final String COUPON_IS_INVALID = "Invalid coupon code!";
