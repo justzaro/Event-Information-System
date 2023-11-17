@@ -48,11 +48,6 @@ public class EventController {
         return eventService.getAllEvents(type);
     }
 
-//    @GetMapping("/concerts")
-//    public List<EventDtoResponse> getAllConcerts() {
-//        return eventService.getAllConcerts();
-//    }
-
     @GetMapping("/active")
     public int getNumberOfActiveEvents() {
         return eventService.getNumberOfActiveEvents();
@@ -83,12 +78,18 @@ public class EventController {
                                      @RequestPart(value = "eventPicture") MultipartFile eventPicture) {
         return eventService.addEvent(eventDto, eventPicture);
     }
-
+    
     @PutMapping(path = "/{eventId}")
     public EventDtoResponse updateEvent(@PathVariable("eventId") Long eventId,
                                         @RequestPart @Valid EventDto eventDto,
                                         @RequestPart(value = "eventPicture") MultipartFile eventPicture) {
         return eventService.updateEvent(eventId, eventDto, eventPicture);
+    }
+
+    @PatchMapping("/activity-status/{id}")
+    public ResponseEntity<Void> toggleEventActivityStatus(@PathVariable("id") Long id) {
+        eventService.toggleEventActivityStatus(id);
+        return ResponseEntity.ok().build();
     }
 
     @PreAuthorize("hasRole('ADMIN')")

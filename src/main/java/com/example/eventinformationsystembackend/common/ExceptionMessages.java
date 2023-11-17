@@ -7,7 +7,7 @@ public class ExceptionMessages {
     public static final String POST_DOES_NOT_EXIST = "Such post does not exist!";
     public static final String CART_ITEM_DOES_NOT_EXIST = "Cart item with this ID does not exist!";
     public static final String COMMENT_DOES_NOT_EXIST = "Comment with this ID does not exist!";
-    public static final String TICKET_DOES_NOT_EXIST = "Ticket with this code does not exist!";
+    public static final String ARTIST_DOES_NOT_EXIST = "Artist with this ID does not exist!";
 
     public static final String RESOURCE_ACCESS_FORBIDDEN = "Access to this resource is forbidden!";
     public static final String ORDER_DOES_NOT_EXIST = "Order with this ID does not exist!";
@@ -29,7 +29,6 @@ public class ExceptionMessages {
 
     public static final String USERNAME_ALREADY_EXISTS = "Desired username is already taken!";
     public static final String EMAIL_ALREADY_EXISTS = "Desired email is already taken!";
-    public static final String PHONE_NUMBER_ALREADY_EXISTS = "Desired phone number is already taken!";
     public static final String EVENT_NAME_ALREADY_EXISTS = "Desired event name is already taken!";
     public static final String ARTIST_ALREADY_EXISTS = "Such artist already exists!";
 

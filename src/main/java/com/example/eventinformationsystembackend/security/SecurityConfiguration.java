@@ -37,7 +37,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/auth/**", "/posts/picture/*", "/tickets/verification/*").permitAll()
                         .requestMatchers("/users", "/users/confirmation", "/users/profile-picture/*", "/users/register").permitAll()
                         .requestMatchers("/events", "/events/{id:\\d+}", "events/event-picture/{id:.+}", "events/concerts").permitAll()
-                        .requestMatchers("/artists").permitAll()
+                        .requestMatchers("/artists", "/artists/profile-picture/{id:.+}").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)

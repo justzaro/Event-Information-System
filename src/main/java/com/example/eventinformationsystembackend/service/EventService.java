@@ -103,7 +103,6 @@ public class EventService {
                 .collect(Collectors.toList());
     }
 
-
     public EventDtoResponse addEvent(EventDto eventDto, MultipartFile eventPicture) {
         if (eventRepository.findEventByName(eventDto.getName()).isPresent()) {
             throw new DuplicateUniqueFieldException(EVENT_NAME_ALREADY_EXISTS);
@@ -302,5 +301,13 @@ public class EventService {
                 .orElseThrow(() -> new ResourceNotFoundException(EVENT_DOES_NOT_EXIST));
 
         return ticketService.getSoldTicketsForEvent(event);
+    }
+
+    public void toggleEventActivityStatus(Long id) {
+        Event event = eventRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(EVENT_DOES_NOT_EXIST));
+
+        event.setIsActive(!event.getIsActive());
+        eventRepository.save(event);
     }
 }
