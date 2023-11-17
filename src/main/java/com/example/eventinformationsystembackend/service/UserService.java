@@ -140,7 +140,7 @@ public class UserService {
             && !user.getProfilePictureName().equals(DEFAULT_USER_PROFILE_PICTURE_NAME)) {
                 storageService.deleteFile(user.getProfilePicturePath());
             }
-
+            System.out.println(profilePicture.getOriginalFilename());
             String newUserProfilePicturePath = newUserFolderPath + "\\"
                     + profilePicture.getOriginalFilename();
 
