@@ -3,10 +3,9 @@ package com.example.eventinformationsystembackend.controller;
 import com.example.eventinformationsystembackend.dto.CommentDtoResponse;
 import com.example.eventinformationsystembackend.dto.PostDto;
 import com.example.eventinformationsystembackend.dto.PostDtoResponse;
-import com.example.eventinformationsystembackend.service.CommentService;
-import com.example.eventinformationsystembackend.service.PostService;
+import com.example.eventinformationsystembackend.service.implementation.CommentServiceImpl;
+import com.example.eventinformationsystembackend.service.implementation.PostServiceImpl;
 import jakarta.validation.Valid;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -18,32 +17,32 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "/posts")
+@RequestMapping("/posts")
 public class PostController {
-    private final PostService postService;
-    private final CommentService commentService;
+    private final PostServiceImpl postServiceImpl;
+    private final CommentServiceImpl commentServiceImpl;
 
     @Autowired
-    public PostController(PostService postService,
-                          CommentService commentService) {
-        this.postService = postService;
-        this.commentService = commentService;
+    public PostController(PostServiceImpl postServiceImpl,
+                          CommentServiceImpl commentServiceImpl) {
+        this.postServiceImpl = postServiceImpl;
+        this.commentServiceImpl = commentServiceImpl;
     }
 
     @GetMapping
     public List<PostDtoResponse> getAllPosts() {
-        return postService.getAllPosts();
+        return postServiceImpl.getAllPosts();
     }
 
-    @GetMapping(path = "/{username}/comments")
-    public List<CommentDtoResponse> getAllCommentsUnderUsersPosts(@PathVariable("username") String username) {
-        return commentService.getAllCommentsUnderUsersPosts(username);
+    @GetMapping("/{username}/comments")
+    public List<CommentDtoResponse> getAllCommentsUnderUsersPosts(@PathVariable String username) {
+        return commentServiceImpl.getAllCommentsUnderUsersPosts(username);
     }
 
-    @GetMapping(path = "/picture/{postId}")
-    public ResponseEntity<?> getPostPicture(@PathVariable("postId") Long postId)
+    @GetMapping("/{id}/picture")
+    public ResponseEntity<?> getPostPicture(@PathVariable Long id)
             throws IOException {
-        byte[] postPicture = postService.getPostPicture(postId);
+        byte[] postPicture = postServiceImpl.getPostPicture(id);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .contentType(MediaType.valueOf("image/png"))
@@ -51,16 +50,16 @@ public class PostController {
     }
 
     @PostMapping(path = "/{username}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public PostDtoResponse addPost(@PathVariable("username") String username,
+    public PostDtoResponse addPost(@PathVariable String username,
                                    @RequestPart("postDto") @Valid PostDto postDto,
                                    @RequestPart("postPicture") MultipartFile postPicture) {
-        return postService.addPost(postDto, postPicture, username);
+        return postServiceImpl.addPost(postDto, postPicture, username);
     }
 
-    @DeleteMapping(path = "/{postId}/{username}")
-    public ResponseEntity<Void> deleteOwnedPost(@PathVariable("postId") Long postId,
-                                                @PathVariable("username") String username) {
-        postService.deletePost(postId, username);
+    @DeleteMapping("/{id}/{username}")
+    public ResponseEntity<Void> deleteOwnedPost(@PathVariable Long id,
+                                                @PathVariable String username) {
+        postServiceImpl.deletePost(id, username);
         return ResponseEntity.noContent().build();
     }
 }

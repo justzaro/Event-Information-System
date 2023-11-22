@@ -38,15 +38,9 @@ public class UserDto {
     @Size(max = 255)
     private String email;
 
-//    @Size(max = 255)
-//    private String phoneNumber;
-
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate dateOfBirth;
 
     @Size(max = 255)
     private String address;
-
-//    @Size(max = 65535)
-//    private String description;
 }
