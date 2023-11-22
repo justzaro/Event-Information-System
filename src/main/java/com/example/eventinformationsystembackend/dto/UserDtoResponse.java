@@ -37,9 +37,6 @@ public class UserDtoResponse {
     @NotBlank
     private String email;
 
-    @NotBlank
-    private String phoneNumber;
-
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate dateOfBirth;
 
@@ -47,7 +44,10 @@ public class UserDtoResponse {
     private String address;
 
     @NotBlank
-    private String description;
+    private String creditCardNumber;
+
+    @NotBlank
+    private String creditCardCvv;
 
     @NotBlank
     private String profilePicturePath;

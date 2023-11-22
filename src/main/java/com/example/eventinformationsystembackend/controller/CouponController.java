@@ -2,7 +2,7 @@ package com.example.eventinformationsystembackend.controller;
 
 import com.example.eventinformationsystembackend.dto.CouponDto;
 import com.example.eventinformationsystembackend.dto.CouponDtoResponse;
-import com.example.eventinformationsystembackend.service.CouponService;
+import com.example.eventinformationsystembackend.service.implementation.CouponServiceImpl;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -12,29 +12,29 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "/coupons")
+@RequestMapping("/coupons")
 public class CouponController {
-    private final CouponService couponService;
+    private final CouponServiceImpl couponServiceImpl;
 
     @Autowired
-    public CouponController(CouponService couponService) {
-        this.couponService = couponService;
+    public CouponController(CouponServiceImpl couponServiceImpl) {
+        this.couponServiceImpl = couponServiceImpl;
     }
 
     @GetMapping
     public List<CouponDtoResponse> getAllCoupons() {
-        return couponService.getAllCoupons();
+        return couponServiceImpl.getAllCoupons();
     }
 
-    @PostMapping(path = "/single-use")
+    @PostMapping("/single-use")
     public void generateSingleUseCoupons(@RequestBody @Valid CouponDto couponDto) {
-        couponService.generateSingleUseCoupons(couponDto);
+        couponServiceImpl.generateSingleUseCoupons(couponDto);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCoupon(@PathVariable("id") Long id) {
-        couponService.deleteCoupon(id);
+    public ResponseEntity<Void> deleteCoupon(@PathVariable Long id) {
+        couponServiceImpl.deleteCoupon(id);
         return ResponseEntity.ok().build();
     }
 }

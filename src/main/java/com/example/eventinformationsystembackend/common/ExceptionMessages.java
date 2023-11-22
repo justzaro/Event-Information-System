@@ -43,4 +43,6 @@ public class ExceptionMessages {
     public static final String WRONG_PASSWORD_EXCEPTION = "Wrong profile password!";
     public static final String ACCOUNT_NOT_ENABLED_EXCEPTION = "You account is not enabled! Please, do so from the link in your email or inform us via the support page!";
     public static final String ACCOUNT_LOCKED_EXCEPTION = "You account is locked by authorized staff!";
+
+    public static final String REQUIRED_PICTURE_IS_MISSING = "Required picture is missing!";
 }

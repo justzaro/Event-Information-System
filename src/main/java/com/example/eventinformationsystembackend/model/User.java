@@ -46,20 +46,20 @@ public class User implements UserDetails {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "phone_number", unique = true)
-    private String phoneNumber;
-
     @Column(name = "date_of_birth", nullable = false)
     private LocalDate dateOfBirth;
 
     @Column(name = "address")
     private String address;
 
-    @Column(name = "description", columnDefinition = "TEXT")
-    private String description;
-
     @Column(name = "profile_picture_path")
     private String profilePicturePath;
+
+    @Column(name = "credit_card_number")
+    private String creditCardNumber;
+
+    @Column(name = "credit_card_cvv")
+    private String creditCardCvv;
 
     @Column(name = "user_role")
     @Enumerated(value = EnumType.STRING)
@@ -71,7 +71,6 @@ public class User implements UserDetails {
     @Column(name = "is_enabled", nullable = false, columnDefinition = "TINYINT(1) DEFAULT FALSE")
     private Boolean isEnabled;
 
-//    @Column(name = "profile_picture_name", columnDefinition = "TEXT")
     @Column(name = "profile_picture_name")
     private String profilePictureName;
 

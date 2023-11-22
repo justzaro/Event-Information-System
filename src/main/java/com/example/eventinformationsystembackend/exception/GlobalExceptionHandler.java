@@ -64,6 +64,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler({
+            InvalidCreditCardCredentialsException.class,
             CartItemTicketsExceedEventCapacity.class,
             PostDoesNotContainImageException.class,
             EmailAlreadyConfirmedException.class,
