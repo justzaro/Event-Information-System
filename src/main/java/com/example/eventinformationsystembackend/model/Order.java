@@ -38,10 +38,6 @@ public class Order {
     @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false)
     private User user;
 
-/*    @ManyToOne
-    @JoinColumn(name = "event_id", referencedColumnName = "event_id", nullable = false)
-    private Event event;*/
-
     @OneToOne
     @JoinColumn(name = "coupon_id", referencedColumnName = "coupon_id")
     private Coupon coupon;

@@ -7,7 +7,7 @@ import com.example.eventinformationsystembackend.model.User;
 import com.example.eventinformationsystembackend.repository.ConfirmationTokenRepository;
 import com.example.eventinformationsystembackend.repository.UserRepository;
 import com.example.eventinformationsystembackend.service.ConfirmationTokenService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import static com.example.eventinformationsystembackend.common.ExceptionMessages.*;
 
@@ -15,16 +15,10 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class ConfirmationTokenServiceImpl implements ConfirmationTokenService {
     private final ConfirmationTokenRepository confirmationTokenRepository;
     private final UserRepository userRepository;
-
-    @Autowired
-    public ConfirmationTokenServiceImpl(ConfirmationTokenRepository confirmationTokenRepository,
-                                        UserRepository userRepository) {
-        this.confirmationTokenRepository = confirmationTokenRepository;
-        this.userRepository = userRepository;
-    }
 
     private void saveConfirmationToken(ConfirmationToken token) {
         confirmationTokenRepository.save(token);

@@ -1,18 +1,24 @@
 package com.example.eventinformationsystembackend.service.implementation;
 
 import com.example.eventinformationsystembackend.common.enums.UserRole;
+
 import com.example.eventinformationsystembackend.dto.PostDto;
 import com.example.eventinformationsystembackend.dto.PostDtoResponse;
+
 import com.example.eventinformationsystembackend.exception.ForbiddenException;
 import com.example.eventinformationsystembackend.exception.PostDoesNotContainImageException;
-import com.example.eventinformationsystembackend.exception.ResourceNotFoundException;
+
 import com.example.eventinformationsystembackend.model.Post;
 import com.example.eventinformationsystembackend.model.User;
+
 import com.example.eventinformationsystembackend.repository.PostRepository;
-import com.example.eventinformationsystembackend.repository.UserRepository;
+
+import com.example.eventinformationsystembackend.service.DataValidationService;
 import com.example.eventinformationsystembackend.service.PostService;
+import com.example.eventinformationsystembackend.service.StorageService;
+
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,21 +33,12 @@ import static com.example.eventinformationsystembackend.common.ExceptionMessages
 import static com.example.eventinformationsystembackend.common.FilePaths.*;
 
 @Service
+@RequiredArgsConstructor
 public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
-    private final UserRepository userRepository;
-    private final StorageServiceImpl storageServiceImpl;
-    private final ModelMapper modelMapper;
-
-    @Autowired
-    public PostServiceImpl(PostRepository postRepository,
-                           UserRepository userRepository,
-                           StorageServiceImpl storageServiceImpl) {
-        this.postRepository = postRepository;
-        this.userRepository = userRepository;
-        this.storageServiceImpl = storageServiceImpl;
-        modelMapper = new ModelMapper();
-    }
+    private final StorageService storageService;
+    private final DataValidationService dataValidationService;
+    private final ModelMapper modelMapper = new ModelMapper();
 
     @Override
     public List<PostDtoResponse> getAllPosts() {
@@ -65,9 +62,8 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public PostDtoResponse addPost(PostDto postDto, MultipartFile postPicture,
-                        String username) {
-        User user = userRepository.findUserByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException(USER_DOES_NOT_EXIST));
+                                   String username) {
+        User user = dataValidationService.getUserByUsername(username);
 
         if (postPicture.isEmpty()) {
             throw new PostDoesNotContainImageException(POST_DOES_NOT_CONTAIN_IMAGE);
@@ -82,18 +78,15 @@ public class PostServiceImpl implements PostService {
         postToAdd.setUser(user);
         postToAdd.setPostPicturePath(postPicturePath);
 
-        storageServiceImpl.savePictureToFileSystem(postPicture, postPicturePath);
+        storageService.savePictureToFileSystem(postPicture, postPicturePath);
 
         return modelMapper.map(postRepository.save(postToAdd), PostDtoResponse.class);
     }
 
     @Override
-    public void deletePost(Long postId, String username) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException(POST_DOES_NOT_EXIST));
-
-        User user = userRepository.findUserByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException(USER_DOES_NOT_EXIST));
+    public void deletePost(Long id, String username) {
+        Post post = getPost(id);
+        User user = dataValidationService.getUserByUsername(username);
 
         if (!post.getUser().getUsername().equals(username)
                 || !user.getUserRole().equals(UserRole.ADMIN)) {
@@ -103,9 +96,8 @@ public class PostServiceImpl implements PostService {
         postRepository.delete(post);
     }
 
-    public byte[] getPostPicture(Long postId) throws IOException {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException(POST_DOES_NOT_EXIST));
+    public byte[] getPostPicture(Long id) throws IOException {
+        Post post = getPost(id);
         String postPicturePath = post.getPostPicturePath();
         return Files.readAllBytes(new File(postPicturePath).toPath());
     }
@@ -113,8 +105,7 @@ public class PostServiceImpl implements PostService {
     @Override
     public void replaceOldUsernameWithNewOneInPicturePathForAllUserPosts(String oldUsername,
                                                                          String newUsername) {
-        User user = userRepository.findUserByUsername(oldUsername)
-                .orElseThrow(() -> new ResourceNotFoundException(USER_DOES_NOT_EXIST));
+        User user = dataValidationService.getUserByUsername(oldUsername);
 
         List<PostDtoResponse> allUserPosts = getAllPostForUser(user);
 
@@ -123,5 +114,10 @@ public class PostServiceImpl implements PostService {
             post.setPostPicturePath(updatedPath);
             postRepository.save(modelMapper.map(post, Post.class));
         }
+    }
+
+    private Post getPost(Long id) {
+        return dataValidationService.
+                getResourceByIdOrThrowException(id, Post.class, POST_DOES_NOT_EXIST);
     }
 }

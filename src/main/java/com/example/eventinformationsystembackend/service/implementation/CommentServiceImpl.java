@@ -8,11 +8,11 @@ import com.example.eventinformationsystembackend.model.Comment;
 import com.example.eventinformationsystembackend.model.Post;
 import com.example.eventinformationsystembackend.model.User;
 import com.example.eventinformationsystembackend.repository.CommentRepository;
-import com.example.eventinformationsystembackend.repository.PostRepository;
-import com.example.eventinformationsystembackend.repository.UserRepository;
 import com.example.eventinformationsystembackend.service.CommentService;
+import com.example.eventinformationsystembackend.service.DataValidationService;
+import com.example.eventinformationsystembackend.service.PostService;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -24,34 +24,19 @@ import java.util.stream.Collectors;
 import static com.example.eventinformationsystembackend.common.ExceptionMessages.*;
 
 @Service
+@RequiredArgsConstructor
 public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
-    private final PostRepository postRepository;
-    private final PostServiceImpl postServiceImpl;
-    private final UserRepository userRepository;
-    private final ModelMapper modelMapper;
-
-    @Autowired
-    public CommentServiceImpl(CommentRepository commentRepository,
-                              PostRepository postRepository,
-                              UserRepository userRepository,
-                              PostServiceImpl postServiceImpl) {
-        this.commentRepository = commentRepository;
-        this.postRepository = postRepository;
-        this.userRepository = userRepository;
-        this.postServiceImpl = postServiceImpl;
-        modelMapper = new ModelMapper();
-    }
+    private final PostService postService;
+    private final DataValidationService dataValidationService;
+    private final ModelMapper modelMapper = new ModelMapper();
 
     @Override
     public CommentDtoResponse addComment(CommentDto commentDto,
-                                         Long postId,
+                                         Long id,
                                          String username) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException(POST_DOES_NOT_EXIST));
-
-        User user = userRepository.findUserByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException(USER_DOES_NOT_EXIST));
+        Post post = dataValidationService.getResourceByIdOrThrowException(id, Post.class, POST_DOES_NOT_EXIST);
+        User user = getUserOrThrowException(username);
 
         Comment commentToAdd = modelMapper.map(commentDto, Comment.class);
 
@@ -67,8 +52,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public List<CommentDtoResponse> getAllCommentsByUser(String username) {
-        User user = userRepository.findUserByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException(USER_DOES_NOT_EXIST));
+        User user = getUserOrThrowException(username);
 
         List<Comment> comments = commentRepository.findAllByUser(user);
 
@@ -80,10 +64,9 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public List<CommentDtoResponse> getAllCommentsUnderUsersPosts(String username) {
-        User user = userRepository.findUserByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException(USER_DOES_NOT_EXIST));
+        User user = getUserOrThrowException(username);
 
-        List<PostDtoResponse> userPosts = postServiceImpl.getAllPostForUser(user);
+        List<PostDtoResponse> userPosts = postService.getAllPostForUser(user);
         List<CommentDtoResponse> allCommentsUnderUserPosts = new ArrayList<>();
 
         for (PostDtoResponse post : userPosts) {
@@ -104,20 +87,25 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public void markCommentAsRead(Long commentId) {
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new ResourceNotFoundException(COMMENT_DOES_NOT_EXIST));
-
+    public void markCommentAsRead(Long id) {
+        Comment comment = getCommentOrThrowException(id);
         comment.setIsRead(true);
         commentRepository.save(comment);
     }
 
     @Override
-    public void markCommentAsRemoved(Long commentId) {
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new ResourceNotFoundException(COMMENT_DOES_NOT_EXIST));
-
+    public void markCommentAsRemoved(Long id) {
+        Comment comment = getCommentOrThrowException(id);
         comment.setIsRemoved(true);
         commentRepository.save(comment);
+    }
+
+    private Comment getCommentOrThrowException(Long id) {
+        return dataValidationService.
+                getResourceByIdOrThrowException(id, Comment.class, COMMENT_DOES_NOT_EXIST);
+    }
+
+    private User getUserOrThrowException(String username) {
+        return dataValidationService.getUserByUsername(username);
     }
 }

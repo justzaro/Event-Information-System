@@ -1,12 +1,15 @@
 package com.example.eventinformationsystembackend.service.implementation;
 
 import com.example.eventinformationsystembackend.model.*;
+
 import com.example.eventinformationsystembackend.repository.OrderItemRepository;
 import com.example.eventinformationsystembackend.repository.TicketRepository;
+
+import com.example.eventinformationsystembackend.service.GenerationService;
 import com.example.eventinformationsystembackend.service.TicketService;
+
 import com.google.zxing.WriterException;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -22,27 +25,11 @@ import static com.example.eventinformationsystembackend.common.QRCodeDetails.*;
 import static com.example.eventinformationsystembackend.common.FilePaths.*;
 
 @Service
+@RequiredArgsConstructor
 public class TicketServiceImpl implements TicketService {
     private final TicketRepository ticketRepository;
-    private final CartItemServiceImpl cartItemServiceImpl;
-    private final GenerationServiceImpl generationServiceImpl;
-    private final OrderItemServiceImpl orderItemServiceImpl;
+    private final GenerationService generationService;
     private final OrderItemRepository orderItemRepository;
-    private final ModelMapper modelMapper;
-
-    @Autowired
-    public TicketServiceImpl(TicketRepository ticketRepository,
-                             CartItemServiceImpl cartItemServiceImpl,
-                             GenerationServiceImpl generationServiceImpl,
-                             OrderItemRepository orderItemRepository,
-                             OrderItemServiceImpl orderItemServiceImpl) {
-        this.ticketRepository = ticketRepository;
-        this.cartItemServiceImpl = cartItemServiceImpl;
-        this.generationServiceImpl = generationServiceImpl;
-        this.orderItemServiceImpl = orderItemServiceImpl;
-        this.orderItemRepository = orderItemRepository;
-        this.modelMapper = new ModelMapper();
-    }
 
     @Override
     public String verifyTicket(String ticketCode) {
@@ -72,7 +59,7 @@ public class TicketServiceImpl implements TicketService {
 
             int ticketsQuantity = cartItem.getTicketQuantity();
 
-            List<String> ticketCodes = generationServiceImpl.
+            List<String> ticketCodes = generationService.
                     generateCodes(ticketsQuantity, TICKET_CODE_LENGTH, TICKET_CODE_ALPHABET);
 
             for (int i = 0; i < ticketsQuantity; i++) {
@@ -82,17 +69,17 @@ public class TicketServiceImpl implements TicketService {
                 try {
                     IP = InetAddress.getLocalHost();
                 } catch (UnknownHostException e) {
-
+                    e.printStackTrace();
                 }
                 String qrCodeContent = "http://" + IP.getHostAddress() + ":8080/tickets/verification/" + code;
                 String path = String.format(QR_CODES_FOLDER_PATH, code + QR_CODE_IMAGE_FORMAT_EXTENSION);
 
                 try {
-                    generationServiceImpl.generateTicketQrCode(qrCodeContent, path);
+                    generationService.generateTicketQrCode(qrCodeContent, path);
                 } catch (IOException e) {
-
+                    e.printStackTrace();
                 } catch (WriterException e) {
-
+                    e.printStackTrace();
                 }
 
                 Ticket ticket = new Ticket();

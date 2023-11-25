@@ -8,6 +8,7 @@ public class EventInformationSystemBackendApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(EventInformationSystemBackendApplication.class, args);
+
 	}
 
 }

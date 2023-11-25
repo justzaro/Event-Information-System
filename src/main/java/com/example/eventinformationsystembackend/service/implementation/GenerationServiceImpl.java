@@ -4,17 +4,20 @@ import com.example.eventinformationsystembackend.dto.EventDtoResponse;
 import com.example.eventinformationsystembackend.dto.OrderItemDtoResponse;
 import com.example.eventinformationsystembackend.dto.TicketDtoResponse;
 import com.example.eventinformationsystembackend.model.*;
+import com.example.eventinformationsystembackend.service.EmailService;
 import com.example.eventinformationsystembackend.service.GenerationService;
+import com.example.eventinformationsystembackend.service.OrderItemService;
+import com.example.eventinformationsystembackend.service.StorageService;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.lowagie.text.pdf.BaseFont;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FileUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.xhtmlrenderer.layout.SharedContext;
 import org.xhtmlrenderer.pdf.ITextRenderer;
@@ -32,21 +35,13 @@ import static com.example.eventinformationsystembackend.common.EmailTexts.*;
 import static com.example.eventinformationsystembackend.common.FilePaths.*;
 
 @Service
+@RequiredArgsConstructor
 public class GenerationServiceImpl implements GenerationService {
 
-    private final OrderItemServiceImpl orderItemServiceImpl;
-    private final EmailServiceImpl emailServiceImpl;
-    private final StorageServiceImpl storageServiceImpl;
+    private final OrderItemService orderItemService;
+    private final EmailService emailService;
+    private final StorageService storageService;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm dd-MM-yyyy");
-
-    @Autowired
-    public GenerationServiceImpl(OrderItemServiceImpl orderItemServiceImpl,
-                                 EmailServiceImpl emailServiceImpl,
-                                 StorageServiceImpl storageServiceImpl) {
-        this.orderItemServiceImpl = orderItemServiceImpl;
-        this.emailServiceImpl = emailServiceImpl;
-        this.storageServiceImpl = storageServiceImpl;
-    }
 
     @Override
     public List<String> generateCodes(int codesQuantity,
@@ -84,23 +79,23 @@ public class GenerationServiceImpl implements GenerationService {
     }
 
     @Override
-    public void generateOrderReceivedEmailTemplate(Order order, User user) throws IOException {
+    public void generateOrderReceivedEmailTemplate(Order order, User user) {
         String tableRows = generateEventInformationTable(order)
                 .toString();
         String billingInformation = generateOrderBillingInformation(order);
 
-        List<OrderItemDtoResponse> orderItems = orderItemServiceImpl.getOrderItems(order.getId());
+        List<OrderItemDtoResponse> orderItems = orderItemService.getOrderItems(order.getId());
 
         String formattedEmail = String.format(ORDER_RECEIVED_EMAIL_TEMPLATE, user.getFirstName(),
                                                                    order.getId(),
                                                                    tableRows,
                                                                    billingInformation);
 
-        emailServiceImpl.sendOrderEmail(user, formattedEmail, orderItems);
+        emailService.sendOrderEmail(user, formattedEmail, orderItems);
     }
 
     private StringBuilder generateEventInformationTable(Order order) {
-        List<OrderItemDtoResponse> orderItems = orderItemServiceImpl.getOrderItems(order.getId());
+        List<OrderItemDtoResponse> orderItems = orderItemService.getOrderItems(order.getId());
 
         StringBuilder sb = new StringBuilder();
 
@@ -177,7 +172,7 @@ public class GenerationServiceImpl implements GenerationService {
         List<String> ticketsPdfFilePaths = new ArrayList<>();
         List<TicketDtoResponse> ticketsForCurrentOrder = new ArrayList<>();
 
-        List<OrderItemDtoResponse> orderItems = orderItemServiceImpl.getOrderItems(order.getId());
+        List<OrderItemDtoResponse> orderItems = orderItemService.getOrderItems(order.getId());
         List<TicketDtoResponse> ticketsForOrderItem = new ArrayList<>();
 
         for (OrderItemDtoResponse orderItem : orderItems) {
@@ -192,23 +187,23 @@ public class GenerationServiceImpl implements GenerationService {
                     ticketsPdfFilePaths.add(currentTicketPdfFilePath);
                     ticketsForCurrentOrder.add(ticket);
                 } catch (IOException e) {
-
+                    e.printStackTrace();
                 }
 
                 //Deletes the .html file created for the current ticket
-                storageServiceImpl.deleteFolder(htmlFilePath);
+                storageService.deleteFolder(htmlFilePath);
             }
             ticketsForOrderItem.clear();
         }
 
         String formattedText = String.format(TICKETS_RECEIVED_EMAIL_TEMPLATE, user.getFirstName());
 
-        emailServiceImpl.sendTicketsEmail(user, formattedText, ticketsPdfFilePaths, ticketsForCurrentOrder);
+        emailService.sendTicketsEmail(user, formattedText, ticketsPdfFilePaths, ticketsForCurrentOrder);
 
         //Deletes the .pdf files and QR Code .png images created for the current order
         for (int i = 0; i < ticketsPdfFilePaths.size(); i++) {
-            storageServiceImpl.deleteFile(ticketsPdfFilePaths.get(i));
-            storageServiceImpl.deleteFile(ticketsForCurrentOrder.get(i).getQrCodeImagePath());
+            storageService.deleteFile(ticketsPdfFilePaths.get(i));
+            storageService.deleteFile(ticketsForCurrentOrder.get(i).getQrCodeImagePath());
         }
     }
 
@@ -223,7 +218,7 @@ public class GenerationServiceImpl implements GenerationService {
         try {
             ticketCodeEncodedInBase64 = generateBase64StringForTicketCode(ticket);
         } catch (IOException e) {
-
+            e.printStackTrace();
         }
 
         String formattedEventStartDate = event.getStartDate().format(formatter);
@@ -263,7 +258,7 @@ public class GenerationServiceImpl implements GenerationService {
         Document document = Jsoup.parse(inputHtml, "UTF-8");
         document.outputSettings().syntax(Document.OutputSettings.Syntax.xml);
 
-        try (OutputStream outputStream = new FileOutputStream(outputPdfFilePath);) {
+        try (OutputStream outputStream = new FileOutputStream(outputPdfFilePath)) {
             ITextRenderer renderer = new ITextRenderer();
             SharedContext sharedContext = renderer.getSharedContext();
 

@@ -14,6 +14,8 @@ public interface UserService {
 
     void deleteUser(String username);
 
+    void toggleUserEnabledStatus(String username);
+
     void toggleUserLockedStatus(String username);
 
     void resetProfilePictureToDefault(String username);
