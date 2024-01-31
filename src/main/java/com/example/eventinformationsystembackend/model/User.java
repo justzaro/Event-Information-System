@@ -95,6 +95,10 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "replier")
     private List<SupportTicketReply> supportTicketReply;
 
+    @OneToOne
+    @JoinColumn(name = "refresh_token_id", referencedColumnName = "refresh_token_id")
+    private RefreshToken refreshToken;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + userRole.name()));

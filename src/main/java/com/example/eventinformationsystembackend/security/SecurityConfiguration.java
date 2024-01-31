@@ -35,7 +35,7 @@ public class SecurityConfiguration {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/auth/authenticate").permitAll()
                         .requestMatchers("/tickets/verification/*").permitAll()
                         .requestMatchers("/posts/{id:\\d+}/picture").permitAll()
                         .requestMatchers("/users", "/users/confirmation", "/users/profile-picture/*", "/users/register").permitAll()
