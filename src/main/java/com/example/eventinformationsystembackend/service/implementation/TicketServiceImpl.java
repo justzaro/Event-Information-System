@@ -85,7 +85,7 @@ public class TicketServiceImpl implements TicketService {
                 Ticket ticket = new Ticket();
 
                 ticket.setCode(code);
-                ticket.setCreateAt(LocalDateTime.now());
+                ticket.setCreatedAt(LocalDateTime.now());
                 ticket.setIsChecked(false);
                 ticket.setEvent(cartItem.getEvent());
                 ticket.setQrCodeImagePath(path);

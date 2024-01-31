@@ -84,7 +84,7 @@ public class UserServiceImpl implements UserService {
         }
 
         String currentUserFolderPath = USERS_FOLDER_PATH + user.getUsername();
-        String newUserFolderPath = USERS_FOLDER_PATH + user.getUsername();
+        String newUserFolderPath = USERS_FOLDER_PATH + userUpdateDto.getUsername();
 
         renameUserFolderInCaseOfNewUsername(user, userUpdateDto, currentUserFolderPath,
                                             profilePicture);

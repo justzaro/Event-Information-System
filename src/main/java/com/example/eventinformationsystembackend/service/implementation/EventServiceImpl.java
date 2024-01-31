@@ -69,6 +69,9 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventDtoResponse addEvent(EventDto eventDto, MultipartFile eventPicture) {
         validateEventDtoData(eventDto);
+        if (eventRepository.findEventByName(eventDto.getName()).isPresent()) {
+            throw new DuplicateUniqueFieldException(EVENT_NAME_ALREADY_EXISTS);
+        }
 
         Event event = modelMapper.map(eventDto, Event.class);
         setNewEventFolderAndPicture(event, eventPicture);
@@ -88,6 +91,9 @@ public class EventServiceImpl implements EventService {
     public EventDtoResponse updateEvent(Long id, EventDto eventDto,
                                         MultipartFile eventPicture) {
         Event event = getEventByIdOrThrowException(id);
+        if (!event.getName().equals(eventDto.getName()) && eventRepository.findEventByName(eventDto.getName()).isPresent()) {
+            throw new DuplicateUniqueFieldException(EVENT_NAME_ALREADY_EXISTS);
+        }
 
         validateEventDtoData(eventDto);
 
@@ -97,7 +103,6 @@ public class EventServiceImpl implements EventService {
                                        eventPicture);
         updateCurrentEventDetails(event, eventDto);
 
-        eventRepository.save(event);
         return modelMapper.map(event, EventDtoResponse.class);
     }
 
@@ -170,10 +175,6 @@ public class EventServiceImpl implements EventService {
     }
 
     private void validateEventDtoData(EventDto eventDto) {
-        if (eventRepository.findEventByName(eventDto.getName()).isPresent()) {
-            throw new DuplicateUniqueFieldException(EVENT_NAME_ALREADY_EXISTS);
-        }
-
         if (eventDto.getStartDate().isAfter(eventDto.getEndDate())) {
             throw new InvalidEventDateException(START_DATE_IS_AFTER_END_DATE);
         }
@@ -217,19 +218,17 @@ public class EventServiceImpl implements EventService {
     }
 
     private void updateCurrentEventDetails(Event event, EventDto eventDto) {
-        modelMapper.map(eventDto, event);
-
         Set<Artist> artists
                 = eventDto.getArtists()
                 .stream()
                 .map(artistDtoResponse -> modelMapper.map(artistDtoResponse, Artist.class))
                 .collect(Collectors.toSet());
 
-        if (eventDto.getArtists().isEmpty()) {
-            event.setArtists(null);
-        } else {
-            event.getArtists().addAll(artists);
-        }
+        event.setArtists(new HashSet<>());
+        event.getArtists().addAll(artists);
+        modelMapper.map(eventDto, event);
+
+        eventRepository.save(event);
     }
 
     private void setNewEventFolderAndPicture(Event event, MultipartFile eventPicture) {

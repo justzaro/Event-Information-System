@@ -59,7 +59,10 @@ public class SupportTicketServiceImpl implements SupportTicketService {
     @Override
     public SupportTicketDtoResponse createSupportTicket(SupportTicketDto supportTicketDto,
                                                         String username) {
-        User user = dataValidationService.getUserByUsername(username);
+        User user = null;
+        if (username != null) {
+            user = dataValidationService.getUserByUsername(username);
+        }
 
         SupportTicket supportTicket =
                 modelMapper.map(supportTicketDto, SupportTicket.class);
@@ -69,7 +72,7 @@ public class SupportTicketServiceImpl implements SupportTicketService {
 
         supportTicket = supportTicketRepository.save(supportTicket);
 
-        String template = generationService.generateSupportTicketReceivedTemplate(supportTicket, user);
+        String template = generationService.generateSupportTicketReceivedTemplate(supportTicket);
         emailService.sendSupportTicketReceivedEmail(supportTicket.getCustomerEmail(), template);
 
         return modelMapper.map(supportTicket, SupportTicketDtoResponse.class);

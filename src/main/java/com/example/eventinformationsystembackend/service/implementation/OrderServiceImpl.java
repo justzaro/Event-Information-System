@@ -3,6 +3,8 @@ package com.example.eventinformationsystembackend.service.implementation;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import com.example.eventinformationsystembackend.dto.OrderInformation;
@@ -120,6 +122,8 @@ public class OrderServiceImpl implements OrderService {
         double totalPrice = 0;
 
         for (CartItemDtoResponse cartItem : cartItems) {
+            System.out.println(cartItem.getId());
+            System.out.println(cartItem.getTotalPrice());
             Event cartItemEvent = eventRepository.findEventByName(cartItem.getEventName())
                     .orElseThrow(() -> new ResourceNotFoundException(EVENT_DOES_NOT_EXIST));
 
@@ -129,6 +133,7 @@ public class OrderServiceImpl implements OrderService {
 
             totalTicketQuantity += cartItem.getTicketQuantity();
             totalPrice += cartItem.getTotalPrice();
+            System.out.println(totalPrice);
         }
 
         return new OrderInformation(totalTicketQuantity, totalPrice);

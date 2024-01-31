@@ -82,10 +82,10 @@ public class GenerationServiceImpl implements GenerationService {
     public void generateOrderReceivedEmailTemplate(Order order, User user) {
         String tableRows = generateEventInformationTable(order)
                 .toString();
+
         String billingInformation = generateOrderBillingInformation(order);
 
         List<OrderItemDtoResponse> orderItems = orderItemService.getOrderItems(order.getId());
-
         String formattedEmail = String.format(ORDER_RECEIVED_EMAIL_TEMPLATE, user.getFirstName(),
                                                                    order.getId(),
                                                                    tableRows,
@@ -99,30 +99,17 @@ public class GenerationServiceImpl implements GenerationService {
 
         StringBuilder sb = new StringBuilder();
 
-        String eventInformationTable =
-                            """
-                             <tr>
-                                <td><img src="cid:%s" alt="Event Image" width="200" height="120"></td>
-                                <td>%s</td>
-                                <td>%s</td>
-                                <td>%s</td>
-                                <td>%.2f лв.</td>
-                                <td>%.2f лв.</td>
-                             </tr>
-                            """;
-
         for (OrderItemDtoResponse orderItem : orderItems) {
             List<TicketDtoResponse> tickets = orderItem.getTickets();
-
             EventDtoResponse event = orderItem.getTickets().get(0).getEvent();
 
             String formattedTableRow =
-                    String.format(eventInformationTable, event.getId(),
-                                                         event.getName(),
-                                                         event.getLocation(),
-                                                         tickets.size(),
-                                                         event.getTicketPrice(),
-                                                         tickets.size() * event.getTicketPrice());
+                    String.format(EVENT_INFORMATION_TABLE_TEMPLATE, event.getId(),
+                                                                    event.getName(),
+                                                                    event.getLocation(),
+                                                                    tickets.size(),
+                                                                    event.getTicketPrice(),
+                                                                    tickets.size() * event.getTicketPrice());
 
             sb.append(formattedTableRow).append("\n");
         }
@@ -152,22 +139,16 @@ public class GenerationServiceImpl implements GenerationService {
             amountToPay -= discountAmount;
         }
 
-        String billingInformation =
-                """
-                 <p><strong style="font-size:18px">Total Order Price:</strong> <span style="color: black;">%.2f лв.</span></p>
-                 <p><strong style="font-size:18px">Coupon Code:</strong> <span style="color: black;">%s</span></p>
-                 <p><strong style="font-size:18px">Discount amount:</strong> <span style="color: black;">%.2f лв.</span></p>
-                 <p><strong style="font-size:18px">Amount To Pay:</strong> <span style="color: black;">%.2f лв.</span>
-                """;
-
-        return String.format(billingInformation, totalOrderPrice,
-                                                 couponCode,
-                                                 discountAmount,
-                                                 amountToPay);
+        return String.format(BILLING_INFORMATION_TEMPLATE, totalOrderPrice,
+                                                           couponCode,
+                                                           discountAmount,
+                                                           amountToPay);
     }
     @Override
     public void generateOrderedTicketsEmailTemplate(Order order, User user) {
         String currentTicketPdfFilePath;
+
+        System.out.println("Asd");
 
         List<String> ticketsPdfFilePaths = new ArrayList<>();
         List<TicketDtoResponse> ticketsForCurrentOrder = new ArrayList<>();
@@ -274,10 +255,9 @@ public class GenerationServiceImpl implements GenerationService {
     }
 
     @Override
-    public String generateSupportTicketReceivedTemplate(SupportTicket supportTicket,
-                                                        User user) {
+    public String generateSupportTicketReceivedTemplate(SupportTicket supportTicket) {
         return String.format(SUPPORT_TICKET_RECEIVED_TEMPLATE,
-                      user.getFirstName(),
+                      supportTicket.getCustomerFirstName(),
                       supportTicket.getId(),
                       supportTicket.getSubject(),
                       supportTicket.getDescription(),

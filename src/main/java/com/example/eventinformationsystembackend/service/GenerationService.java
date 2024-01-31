@@ -16,7 +16,7 @@ public interface GenerationService {
 
     void generateOrderedTicketsEmailTemplate(Order order, User user);
 
-    String generateSupportTicketReceivedTemplate(SupportTicket supportTicket, User user);
+    String generateSupportTicketReceivedTemplate(SupportTicket supportTicket);
 
     String generateSupportTicketResponseTemplate(SupportTicketReply supportTicketReply, User user);
 

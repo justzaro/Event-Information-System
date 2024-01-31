@@ -37,13 +37,14 @@ public class UserUpdateDto {
     private LocalDate dateOfBirth;
 
     @Size(max = 255)
+    private String password;
+
+    @Size(max = 255)
     private String address;
 
-    @NotBlank(message = "Credit card number field should not be blank")
     @Size(max = 16, message = "Credit card number should not be longer than 16 digits")
     private String creditCardNumber;
 
-    @NotBlank(message = "Credit card number field should not be blank")
     @Size(max = 3, message = "CVV number should be 3 digits long")
     private String creditCardCvv;
 }

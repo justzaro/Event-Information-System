@@ -4,6 +4,7 @@ import jakarta.servlet.Filter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -40,6 +41,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/users", "/users/confirmation", "/users/profile-picture/*", "/users/register").permitAll()
                         .requestMatchers("/events", "/events/{id:\\d+}", "events/event-picture/{id:.+}", "events/concerts").permitAll()
                         .requestMatchers("/artists", "/artists/profile-picture/{id:\\d+}").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/support-tickets").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)

@@ -21,7 +21,6 @@ public class ArtistDto {
     @Size(max = 255)
     private String lastName;
 
-    @NotBlank(message = "Description field should not be blank")
     @Size(max = 65535)
     private String description;
 }

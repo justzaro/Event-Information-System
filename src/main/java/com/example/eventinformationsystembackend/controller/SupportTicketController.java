@@ -31,12 +31,26 @@ public class SupportTicketController {
         return supportTicketService.getAllSupportTicketsForUser(username);
     }
 
+//    @PostMapping("/{username}")
+//    public SupportTicketDtoResponse createSupportTicket(
+//            @RequestBody @Valid SupportTicketDto supportTicketDto,
+//            @PathVariable String username) {
+//
+//        return supportTicketService.createSupportTicket(supportTicketDto,
+//                username);
+//    }
     @PostMapping("/{username}")
     public SupportTicketDtoResponse createSupportTicket(
             @RequestBody @Valid SupportTicketDto supportTicketDto,
             @PathVariable String username) {
+
         return supportTicketService.createSupportTicket(supportTicketDto,
                 username);
+    }
+
+    @PostMapping
+    public SupportTicketDtoResponse createSupportTicketAsGuest(@RequestBody @Valid SupportTicketDto supportTicketDto) {
+        return supportTicketService.createSupportTicket(supportTicketDto, null);
     }
 
     @PreAuthorize("hasRole('ADMIN')")

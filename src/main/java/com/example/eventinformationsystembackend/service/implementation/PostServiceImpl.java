@@ -89,7 +89,7 @@ public class PostServiceImpl implements PostService {
         User user = dataValidationService.getUserByUsername(username);
 
         if (!post.getUser().getUsername().equals(username)
-                || !user.getUserRole().equals(UserRole.ADMIN)) {
+                && !user.getUserRole().equals(UserRole.ADMIN)) {
             throw new ForbiddenException(RESOURCE_ACCESS_FORBIDDEN);
         }
 
