@@ -3,10 +3,12 @@ package com.example.eventinformationsystembackend.controller;
 import com.example.eventinformationsystembackend.dto.CommentDtoResponse;
 import com.example.eventinformationsystembackend.dto.PostDto;
 import com.example.eventinformationsystembackend.dto.PostDtoResponse;
-import com.example.eventinformationsystembackend.service.implementation.CommentServiceImpl;
-import com.example.eventinformationsystembackend.service.implementation.PostServiceImpl;
+import com.example.eventinformationsystembackend.service.CommentService;
+import com.example.eventinformationsystembackend.service.PostService;
+
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,31 +20,25 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/posts")
+@RequiredArgsConstructor
 public class PostController {
-    private final PostServiceImpl postServiceImpl;
-    private final CommentServiceImpl commentServiceImpl;
-
-    @Autowired
-    public PostController(PostServiceImpl postServiceImpl,
-                          CommentServiceImpl commentServiceImpl) {
-        this.postServiceImpl = postServiceImpl;
-        this.commentServiceImpl = commentServiceImpl;
-    }
+    private final PostService postService;
+    private final CommentService commentService;
 
     @GetMapping
     public List<PostDtoResponse> getAllPosts() {
-        return postServiceImpl.getAllPosts();
+        return postService.getAllPosts();
     }
 
     @GetMapping("/{username}/comments")
     public List<CommentDtoResponse> getAllCommentsUnderUsersPosts(@PathVariable String username) {
-        return commentServiceImpl.getAllCommentsUnderUsersPosts(username);
+        return commentService.getAllCommentsUnderUsersPosts(username);
     }
 
     @GetMapping("/{id}/picture")
     public ResponseEntity<?> getPostPicture(@PathVariable Long id)
             throws IOException {
-        byte[] postPicture = postServiceImpl.getPostPicture(id);
+        byte[] postPicture = postService.getPostPicture(id);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .contentType(MediaType.valueOf("image/png"))
@@ -53,13 +49,13 @@ public class PostController {
     public PostDtoResponse addPost(@PathVariable String username,
                                    @RequestPart("postDto") @Valid PostDto postDto,
                                    @RequestPart("postPicture") MultipartFile postPicture) {
-        return postServiceImpl.addPost(postDto, postPicture, username);
+        return postService.addPost(postDto, postPicture, username);
     }
 
     @DeleteMapping("/{id}/{username}")
     public ResponseEntity<Void> deleteOwnedPost(@PathVariable Long id,
                                                 @PathVariable String username) {
-        postServiceImpl.deletePost(id, username);
+        postService.deletePost(id, username);
         return ResponseEntity.noContent().build();
     }
 }

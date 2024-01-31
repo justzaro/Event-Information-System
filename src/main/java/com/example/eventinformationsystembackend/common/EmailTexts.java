@@ -1,6 +1,25 @@
 package com.example.eventinformationsystembackend.common;
 
 public class EmailTexts {
+    public static final String EVENT_INFORMATION_TABLE_TEMPLATE =
+                            """
+                             <tr>
+                                <td><img src="cid:%s" alt="Event Image" width="200" height="120"></td>
+                                <td>%s</td>
+                                <td>%s</td>
+                                <td>%s</td>
+                                <td>%.2f лв.</td>
+                                <td>%.2f лв.</td>
+                             </tr>
+                            """;
+
+    public static final String BILLING_INFORMATION_TEMPLATE =
+                            """
+                             <p><strong style="font-size:18px">Total Order Price:</strong> <span style="color: black;">%.2f лв.</span></p>
+                             <p><strong style="font-size:18px">Coupon Code:</strong> <span style="color: black;">%s</span></p>
+                             <p><strong style="font-size:18px">Discount amount:</strong> <span style="color: black;">%.2f лв.</span></p>
+                             <p><strong style="font-size:18px">Amount To Pay:</strong> <span style="color: black;">%.2f лв.</span>
+                            """;
     public static final String ACCOUNT_CONFIRMATION_EMAIL_TEMPLATE =
                         """
                                 <!DOCTYPE html>

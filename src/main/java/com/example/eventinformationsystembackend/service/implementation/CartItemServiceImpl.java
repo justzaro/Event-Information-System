@@ -9,11 +9,12 @@ import com.example.eventinformationsystembackend.model.CartItem;
 import com.example.eventinformationsystembackend.model.Event;
 import com.example.eventinformationsystembackend.model.User;
 import com.example.eventinformationsystembackend.repository.CartItemRepository;
-import com.example.eventinformationsystembackend.repository.EventRepository;
 import com.example.eventinformationsystembackend.repository.UserRepository;
 import com.example.eventinformationsystembackend.service.CartItemService;
+import com.example.eventinformationsystembackend.service.DataValidationService;
+import com.example.eventinformationsystembackend.service.EventService;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,24 +23,13 @@ import java.util.stream.Collectors;
 import static com.example.eventinformationsystembackend.common.ExceptionMessages.*;
 
 @Service
+@RequiredArgsConstructor
 public class CartItemServiceImpl implements CartItemService {
     private final CartItemRepository cartItemRepository;
     private final UserRepository userRepository;
-    private final EventRepository eventRepository;
-    private final EventServiceImpl eventServiceImpl;
-    private final ModelMapper modelMapper;
-
-    @Autowired
-    public CartItemServiceImpl(CartItemRepository cartItemRepository,
-                               UserRepository userRepository,
-                               EventRepository eventRepository,
-                               EventServiceImpl eventServiceImpl) {
-        this.cartItemRepository = cartItemRepository;
-        this.userRepository = userRepository;
-        this.eventRepository = eventRepository;
-        this.eventServiceImpl = eventServiceImpl;
-        this.modelMapper = new ModelMapper();
-    }
+    private final EventService eventService;
+    private final DataValidationService dataValidationService;
+    private final ModelMapper modelMapper = new ModelMapper();
 
     @Override
     public Integer getAllCartItemsNumberForUser(String username) {
@@ -57,8 +47,7 @@ public class CartItemServiceImpl implements CartItemService {
 
     @Override
     public List<CartItemDtoResponse> getAllCartItemsForUser(String username) {
-        User user = userRepository.findUserByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException(USER_DOES_NOT_EXIST));
+        User user = dataValidationService.getUserByUsername(username);
 
         List<CartItem> cartItems = cartItemRepository.findAllByUser(user);
 
@@ -81,11 +70,8 @@ public class CartItemServiceImpl implements CartItemService {
 
     @Override
     public void decreaseCartItemTicketQuantity(CartItemDto cartItemDto) {
-        User user = userRepository.findUserByUsername(cartItemDto.getUsername())
-                .orElseThrow(() -> new ResourceNotFoundException(USER_DOES_NOT_EXIST));
-
-        Event event = eventRepository.findEventByName(cartItemDto.getEventName())
-                .orElseThrow(() -> new ResourceNotFoundException(EVENT_DOES_NOT_EXIST));
+        User user = dataValidationService.getUserByUsername(cartItemDto.getUsername());
+        Event event = dataValidationService.getEventByName(cartItemDto.getEventName());
 
         List<CartItem> cartItems = cartItemRepository.findAllByUser(user);
 
@@ -101,15 +87,12 @@ public class CartItemServiceImpl implements CartItemService {
 
     @Override
     public CartItemDtoResponse addCartItem(CartItemDto cartItemDto) {
-        User user = userRepository.findUserByUsername(cartItemDto.getUsername())
-                .orElseThrow(() -> new ResourceNotFoundException(USER_DOES_NOT_EXIST));
-
-        Event event = eventRepository.findEventByName(cartItemDto.getEventName())
-                .orElseThrow(() -> new ResourceNotFoundException(EVENT_DOES_NOT_EXIST));
+        User user = dataValidationService.getUserByUsername(cartItemDto.getUsername());
+        Event event = dataValidationService.getEventByName(cartItemDto.getEventName());
 
         List<CartItem> cartItems = cartItemRepository.findAllByUser(user);
 
-        if (!eventServiceImpl.checkIfEventHasEnoughSeats(event, cartItemDto.getTicketQuantity())) {
+        if (!eventService.checkIfEventHasEnoughSeats(event, cartItemDto.getTicketQuantity())) {
             throw new NotEnoughSeatsException(NOT_ENOUGH_SEATS);
         }
 
@@ -165,8 +148,8 @@ public class CartItemServiceImpl implements CartItemService {
 
     @Override
     public void removeCartItem(Long id) {
-        CartItem cartItem = cartItemRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(CART_ITEM_DOES_NOT_EXIST));
+        CartItem cartItem = dataValidationService.
+                getResourceByIdOrThrowException(id, CartItem.class, CART_ITEM_DOES_NOT_EXIST);
 
         cartItemRepository.delete(cartItem);
     }

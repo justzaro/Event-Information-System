@@ -27,7 +27,7 @@ public class Ticket {
     private String qrCodeImagePath;
 
     @Column(name = "created_at", nullable = false)
-    private LocalDateTime createAt;
+    private LocalDateTime createdAt;
 
     @Column(name = "is_checked", nullable = false)
     private Boolean isChecked;
@@ -46,7 +46,7 @@ public class Ticket {
                 "id=" + id +
                 ", code='" + code + '\'' +
                 ", qrCodeImagePath='" + qrCodeImagePath + '\'' +
-                ", createAt=" + createAt +
+                ", createAt=" + createdAt +
                 ", isChecked=" + isChecked +
                 ", orderItemId=" + orderItem.getId() +
                 '}';

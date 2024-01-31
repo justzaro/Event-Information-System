@@ -2,14 +2,19 @@ package com.example.eventinformationsystembackend.service.implementation;
 
 import com.example.eventinformationsystembackend.dto.SupportTicketDto;
 import com.example.eventinformationsystembackend.dto.SupportTicketDtoResponse;
-import com.example.eventinformationsystembackend.exception.ResourceNotFoundException;
+
 import com.example.eventinformationsystembackend.model.SupportTicket;
 import com.example.eventinformationsystembackend.model.User;
+
 import com.example.eventinformationsystembackend.repository.SupportTicketRepository;
-import com.example.eventinformationsystembackend.repository.UserRepository;
+
+import com.example.eventinformationsystembackend.service.DataValidationService;
+import com.example.eventinformationsystembackend.service.EmailService;
+import com.example.eventinformationsystembackend.service.GenerationService;
 import com.example.eventinformationsystembackend.service.SupportTicketService;
+
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -17,28 +22,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.example.eventinformationsystembackend.common.ExceptionMessages.SUPPORT_TICKET_NOT_EXIST;
-import static com.example.eventinformationsystembackend.common.ExceptionMessages.USER_DOES_NOT_EXIST;
 
 @Service
+@RequiredArgsConstructor
 public class SupportTicketServiceImpl implements SupportTicketService {
 
     private final SupportTicketRepository supportTicketRepository;
-    private final GenerationServiceImpl generationServiceImpl;
-    private final EmailServiceImpl emailServiceImpl;
-    private final UserRepository userRepository;
-    private final ModelMapper modelMapper;
-
-    @Autowired
-    public SupportTicketServiceImpl(SupportTicketRepository supportTicketRepository,
-                                    UserRepository userRepository,
-                                    GenerationServiceImpl generationServiceImpl,
-                                    EmailServiceImpl emailServiceImpl) {
-        this.supportTicketRepository = supportTicketRepository;
-        this.userRepository = userRepository;
-        this.generationServiceImpl = generationServiceImpl;
-        this.emailServiceImpl = emailServiceImpl;
-        this.modelMapper = new ModelMapper();
-    }
+    private final GenerationService generationService;
+    private final EmailService emailService;
+    private final DataValidationService dataValidationService;
+    private final ModelMapper modelMapper = new ModelMapper();
 
     @Override
     public List<SupportTicketDtoResponse> getAllSupportTickets() {
@@ -52,8 +45,7 @@ public class SupportTicketServiceImpl implements SupportTicketService {
 
     @Override
     public List<SupportTicketDtoResponse> getAllSupportTicketsForUser(String username) {
-        User user = userRepository.findUserByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException(USER_DOES_NOT_EXIST));
+        User user = dataValidationService.getUserByUsername(username);
 
         List<SupportTicket> supportTickets =
                 supportTicketRepository.findAllByUser(user);
@@ -67,8 +59,10 @@ public class SupportTicketServiceImpl implements SupportTicketService {
     @Override
     public SupportTicketDtoResponse createSupportTicket(SupportTicketDto supportTicketDto,
                                                         String username) {
-        User user = userRepository.findUserByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException(USER_DOES_NOT_EXIST));
+        User user = null;
+        if (username != null) {
+            user = dataValidationService.getUserByUsername(username);
+        }
 
         SupportTicket supportTicket =
                 modelMapper.map(supportTicketDto, SupportTicket.class);
@@ -78,17 +72,16 @@ public class SupportTicketServiceImpl implements SupportTicketService {
 
         supportTicket = supportTicketRepository.save(supportTicket);
 
-        String template = generationServiceImpl.generateSupportTicketReceivedTemplate(supportTicket, user);
-        emailServiceImpl.sendSupportTicketReceivedEmail(supportTicket.getCustomerEmail(), template);
+        String template = generationService.generateSupportTicketReceivedTemplate(supportTicket);
+        emailService.sendSupportTicketReceivedEmail(supportTicket.getCustomerEmail(), template);
 
         return modelMapper.map(supportTicket, SupportTicketDtoResponse.class);
     }
 
     @Override
     public void deleteSupportTicket(Long id) {
-        SupportTicket supportTicket =
-                supportTicketRepository.findById(id)
-                        .orElseThrow(() -> new ResourceNotFoundException(SUPPORT_TICKET_NOT_EXIST));
+        SupportTicket supportTicket = dataValidationService
+                .getResourceByIdOrThrowException(id, SupportTicket.class, SUPPORT_TICKET_NOT_EXIST);
 
         supportTicketRepository.delete(supportTicket);
     }

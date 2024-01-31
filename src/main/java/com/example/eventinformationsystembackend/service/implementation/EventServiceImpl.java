@@ -1,21 +1,24 @@
 package com.example.eventinformationsystembackend.service.implementation;
 
-import com.example.eventinformationsystembackend.common.enums.Currency;
 import com.example.eventinformationsystembackend.common.enums.EventType;
+
 import com.example.eventinformationsystembackend.dto.EventDto;
 import com.example.eventinformationsystembackend.dto.EventDtoResponse;
+
 import com.example.eventinformationsystembackend.exception.DuplicateUniqueFieldException;
 import com.example.eventinformationsystembackend.exception.InvalidEventDateException;
-import com.example.eventinformationsystembackend.exception.ResourceNotFoundException;
+
 import com.example.eventinformationsystembackend.model.*;
+
 import com.example.eventinformationsystembackend.repository.EventRepository;
 import com.example.eventinformationsystembackend.repository.OrderRepository;
-import com.example.eventinformationsystembackend.service.EventService;
+
+import com.example.eventinformationsystembackend.service.*;
+
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FilenameUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.aop.AopInvocationException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,32 +33,19 @@ import static com.example.eventinformationsystembackend.common.ExceptionMessages
 import static com.example.eventinformationsystembackend.common.FilePaths.EVENTS_FOLDER_PATH;
 
 @Service
+@RequiredArgsConstructor
 public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final OrderRepository orderRepository;
-    private final StorageServiceImpl storageServiceImpl;
-    private final ImageServiceImpl imageServiceImpl;
-    private final TicketServiceImpl ticketServiceImpl;
-    private final ModelMapper modelMapper;
-
-    @Autowired
-    public EventServiceImpl(EventRepository eventRepository,
-                            OrderRepository orderRepository,
-                            StorageServiceImpl storageServiceImpl,
-                            ImageServiceImpl imageServiceImpl,
-                            @Lazy TicketServiceImpl ticketServiceImpl) {
-        this.eventRepository = eventRepository;
-        this.orderRepository = orderRepository;
-        this.storageServiceImpl = storageServiceImpl;
-        this.imageServiceImpl = imageServiceImpl;
-        this.ticketServiceImpl = ticketServiceImpl;
-        this.modelMapper = new ModelMapper();
-    }
+    private final StorageService storageService;
+    private final ImageService imageService;
+    private final TicketService ticketService;
+    private final DataValidationService dataValidationService;
+    private final ModelMapper modelMapper = new ModelMapper();
 
     @Override
     public EventDtoResponse getEvent(Long id) {
-        Event event = eventRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(EVENT_DOES_NOT_EXIST));
+        Event event = getEventByIdOrThrowException(id);
 
         return modelMapper.map(event, EventDtoResponse.class);
     }
@@ -78,134 +68,51 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventDtoResponse addEvent(EventDto eventDto, MultipartFile eventPicture) {
+        validateEventDtoData(eventDto);
         if (eventRepository.findEventByName(eventDto.getName()).isPresent()) {
             throw new DuplicateUniqueFieldException(EVENT_NAME_ALREADY_EXISTS);
         }
 
-        if (eventDto.getStartDate().isAfter(eventDto.getEndDate())) {
-            throw new InvalidEventDateException(START_DATE_IS_AFTER_END_DATE);
-        }
+        Event event = modelMapper.map(eventDto, Event.class);
+        setNewEventFolderAndPicture(event, eventPicture);
 
-        if (eventDto.getStartDate().isEqual(eventDto.getEndDate())) {
-            throw new InvalidEventDateException(EQUAL_START_AND_END_DATE);
-        }
-
-        Event eventToAdd = modelMapper.map(eventDto, Event.class);
-
-        String eventFolderPath = EVENTS_FOLDER_PATH + eventToAdd.getName();
-        String eventPicturePath = eventFolderPath + "\\" + eventPicture.getOriginalFilename();
-        String resizedEventPicturePath = eventFolderPath + "\\resized.jpg";
-
-        String imageExtension = FilenameUtils.getExtension(eventPicture.getOriginalFilename());
-        System.out.println(imageExtension);
-
-        if (eventDto.getCurrency() == null) {
-            eventToAdd.setCurrency(Currency.BGN);
-        }
-
-        eventToAdd.setEventPicturePath(eventPicturePath);
-        eventToAdd.setIsActive(eventDto.getIsActive());
-        eventToAdd.setEventPictureName(eventPicture.getOriginalFilename());
-        eventToAdd.setEventType(eventDto.getEventType());
-
-        eventRepository.save(eventToAdd);
-
-        storageServiceImpl.createFolder(eventFolderPath);
-        storageServiceImpl.savePictureToFileSystem(eventPicture, eventPicturePath);
-        imageServiceImpl.createResizedImage(eventPicturePath, resizedEventPicturePath, imageExtension);
-
-        return modelMapper.map(eventToAdd, EventDtoResponse.class);
+        eventRepository.save(event);
+        return modelMapper.map(event, EventDtoResponse.class);
     }
 
     @Override
     public byte[] getEventPicture(Long id) throws IOException {
-        Event event = eventRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(EVENT_DOES_NOT_EXIST));
+        Event event = getEventByIdOrThrowException(id);
         String eventPicturePath = event.getEventPicturePath();
-        byte[] eventPicture =
-                Files.readAllBytes(new File(eventPicturePath).toPath());
-        return eventPicture;
+        return Files.readAllBytes(new File(eventPicturePath).toPath());
     }
 
     @Override
-    public EventDtoResponse updateEvent(Long eventId, EventDto eventDto,
+    public EventDtoResponse updateEvent(Long id, EventDto eventDto,
                                         MultipartFile eventPicture) {
-        Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new ResourceNotFoundException(EVENT_DOES_NOT_EXIST));
-
-        if (!event.getName().equals(eventDto.getName())) {
-            if (eventRepository.findEventByName(event.getName()).isPresent()) {
-                throw new DuplicateUniqueFieldException(EVENT_NAME_ALREADY_EXISTS);
-            }
+        Event event = getEventByIdOrThrowException(id);
+        if (!event.getName().equals(eventDto.getName()) && eventRepository.findEventByName(eventDto.getName()).isPresent()) {
+            throw new DuplicateUniqueFieldException(EVENT_NAME_ALREADY_EXISTS);
         }
 
-        if (eventDto.getStartDate().isAfter(eventDto.getEndDate())) {
-            throw new InvalidEventDateException(START_DATE_IS_AFTER_END_DATE);
-        }
-
-        if (eventDto.getStartDate().isEqual(eventDto.getEndDate())) {
-            throw new InvalidEventDateException(EQUAL_START_AND_END_DATE);
-        }
+        validateEventDtoData(eventDto);
 
         String oldEventFolderPath = EVENTS_FOLDER_PATH + event.getName();
-        String newEventFolderPath = EVENTS_FOLDER_PATH + event.getName();
 
-        if (!event.getName().equals(eventDto.getName())) {
-            if (eventRepository.findEventByName(eventDto.getName()).isPresent()) {
-                throw new DuplicateUniqueFieldException(EVENT_NAME_ALREADY_EXISTS);
-            }
-            newEventFolderPath = EVENTS_FOLDER_PATH + eventDto.getName();
-            storageServiceImpl.renameFolder(oldEventFolderPath, newEventFolderPath);
-
-            if (event.getEventPicturePath() != null) {
-                String newEventPicturePath = newEventFolderPath + "\\" + event.getEventPictureName();
-                event.setEventPicturePath(newEventPicturePath);
-            }
-        }
-
-        if (eventPicture != null) {
-            if (!eventPicture.isEmpty()) {
-                String newEventPicturePath = newEventFolderPath + "\\" + eventPicture.getOriginalFilename();
-                storageServiceImpl.savePictureToFileSystem(eventPicture, newEventPicturePath);
-                event.setEventPicturePath(newEventPicturePath);
-            }
-        }
-
-        event.setName(eventDto.getName());
-        event.setDescription(eventDto.getDescription());
-        event.setLocation(eventDto.getLocation());
-        event.setStartDate(eventDto.getStartDate());
-        event.setEndDate(eventDto.getEndDate());
-        event.setCurrency(eventDto.getCurrency());
-        event.setTicketPrice(eventDto.getTicketPrice());
-        event.setCapacity(eventDto.getCapacity());
-        event.setEventType(eventDto.getEventType());
-        event.setIsActive(eventDto.getIsActive());
-
-        Set<Artist> artists = eventDto.getArtists()
-                .stream()
-                .map(artistDtoResponse -> modelMapper.map(artistDtoResponse, Artist.class)).collect(Collectors.toSet());
-
-        if (eventDto.getArtists().isEmpty()) {
-            event.setArtists(null);
-        } else {
-            event.getArtists().addAll(artists);
-        }
-
-        eventRepository.save(event);
+        checkForNewEventNameAndPicture(event, eventDto, oldEventFolderPath,
+                                       eventPicture);
+        updateCurrentEventDetails(event, eventDto);
 
         return modelMapper.map(event, EventDtoResponse.class);
     }
 
     @Override
-    public void deleteEvent(Long eventId) {
-        Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new ResourceNotFoundException(EVENT_DOES_NOT_EXIST));
+    public void deleteEvent(Long id) {
+        Event event = getEventByIdOrThrowException(id);
 
         String eventFolderPath = EVENTS_FOLDER_PATH + event.getName();
 
-        storageServiceImpl.deleteFolder(eventFolderPath);
-
+        storageService.deleteFolder(eventFolderPath);
         eventRepository.delete(event);
     }
 
@@ -229,33 +136,13 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public int getNumberOfUpcomingEvents(int type) {
-        int daysToAdd = 0;
-
-        switch (type) {
-            case 1 -> daysToAdd = 7;
-            case 2 -> daysToAdd = 30;
-            case 3 -> daysToAdd = 90;
-            case 4 -> daysToAdd = 180;
-            case 5 -> daysToAdd = 360;
-        }
-
-        LocalDateTime boundary = LocalDateTime.now().plusDays(daysToAdd);
+        LocalDateTime boundary = LocalDateTime.now().plusDays(getDays(type));
         return eventRepository.countAllBetweenNowAndBoundaryDate(boundary);
     }
 
     @Override
     public int getNumberOfBookedEvents(int type) {
-        int daysToRemove = 0;
-
-        switch (type) {
-            case 1 -> daysToRemove = 7;
-            case 2 -> daysToRemove = 30;
-            case 3 -> daysToRemove = 90;
-            case 4 -> daysToRemove = 180;
-            case 5 -> daysToRemove = 360;
-        }
-
-        LocalDateTime boundary = LocalDateTime.now().minusDays(daysToRemove);
+        LocalDateTime boundary = LocalDateTime.now().minusDays(getDays(type));
         return eventRepository.countAllWithAtLeastOneTicketBoughtInTheLastTargetDays(boundary);
     }
 
@@ -271,18 +158,102 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public int getAttendancePercentageForEvent(Long id) {
-        Event event = eventRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(EVENT_DOES_NOT_EXIST));
-
-        return ticketServiceImpl.getSoldTicketsForEvent(event);
+        Event event = getEventByIdOrThrowException(id);
+        return ticketService.getSoldTicketsForEvent(event);
     }
 
     @Override
     public void toggleEventActivityStatus(Long id) {
-        Event event = eventRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(EVENT_DOES_NOT_EXIST));
-
+        Event event = getEventByIdOrThrowException(id);
         event.setIsActive(!event.getIsActive());
         eventRepository.save(event);
+    }
+
+    private Event getEventByIdOrThrowException(Long id) {
+        return dataValidationService.
+                getResourceByIdOrThrowException(id, Event.class, EVENT_DOES_NOT_EXIST);
+    }
+
+    private void validateEventDtoData(EventDto eventDto) {
+        if (eventDto.getStartDate().isAfter(eventDto.getEndDate())) {
+            throw new InvalidEventDateException(START_DATE_IS_AFTER_END_DATE);
+        }
+
+        if (eventDto.getStartDate().isEqual(eventDto.getEndDate())) {
+            throw new InvalidEventDateException(EQUAL_START_AND_END_DATE);
+        }
+    }
+
+    private void checkForNewEventNameAndPicture(Event event, EventDto eventDto,
+                                                String oldEventFolderPath,
+                                                MultipartFile eventPicture) {
+        String newEventFolderPath = oldEventFolderPath;
+
+        if (!event.getName().equals(eventDto.getName())) {
+            if (eventRepository.findEventByName(eventDto.getName()).isPresent()) {
+                throw new DuplicateUniqueFieldException(EVENT_NAME_ALREADY_EXISTS);
+            }
+            newEventFolderPath = EVENTS_FOLDER_PATH + eventDto.getName();
+            storageService.renameFolder(oldEventFolderPath, newEventFolderPath);
+
+            if (event.getEventPicturePath() != null) {
+                String newEventPicturePath = newEventFolderPath + "\\" + event.getEventPictureName();
+                event.setEventPicturePath(newEventPicturePath);
+            }
+        }
+
+        replaceOldEventPicture(event, newEventFolderPath, eventPicture);
+    }
+
+    private void replaceOldEventPicture(Event event,
+                                        String newEventFolderPath,
+                                        MultipartFile eventPicture) {
+        if (eventPicture != null) {
+            if (!eventPicture.isEmpty()) {
+                String newEventPicturePath = newEventFolderPath + "\\" + eventPicture.getOriginalFilename();
+                storageService.savePictureToFileSystem(eventPicture, newEventPicturePath);
+                event.setEventPicturePath(newEventPicturePath);
+            }
+        }
+    }
+
+    private void updateCurrentEventDetails(Event event, EventDto eventDto) {
+        Set<Artist> artists
+                = eventDto.getArtists()
+                .stream()
+                .map(artistDtoResponse -> modelMapper.map(artistDtoResponse, Artist.class))
+                .collect(Collectors.toSet());
+
+        event.setArtists(new HashSet<>());
+        event.getArtists().addAll(artists);
+        modelMapper.map(eventDto, event);
+
+        eventRepository.save(event);
+    }
+
+    private void setNewEventFolderAndPicture(Event event, MultipartFile eventPicture) {
+        String eventFolderPath = EVENTS_FOLDER_PATH + event.getName();
+        String eventPicturePath = eventFolderPath + "\\" + eventPicture.getOriginalFilename();
+        String resizedEventPicturePath = eventFolderPath + "\\resized.jpg";
+
+        String imageExtension = FilenameUtils.getExtension(eventPicture.getOriginalFilename());
+
+        event.setEventPicturePath(eventPicturePath);
+        event.setEventPictureName(eventPicture.getOriginalFilename());
+
+        storageService.createFolder(eventFolderPath);
+        storageService.savePictureToFileSystem(eventPicture, eventPicturePath);
+        imageService.createResizedImage(eventPicturePath, resizedEventPicturePath, imageExtension);
+    }
+
+    private int getDays(int type) {
+        return switch (type) {
+            case 1 -> 7;
+            case 2 -> 30;
+            case 3 -> 90;
+            case 4 -> 180;
+            case 5 -> 360;
+            default -> 0;
+        };
     }
 }

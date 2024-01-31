@@ -20,7 +20,7 @@ public class StorageServiceImpl implements StorageService {
         try {
             picture.transferTo(new File(path));
         } catch (IOException e) {
-
+            e.printStackTrace();
         }
     }
 
@@ -43,8 +43,8 @@ public class StorageServiceImpl implements StorageService {
 
         try {
             Files.move(currentFolder, renamedFolder);
-        } catch (FileAlreadyExistsException e) {
         } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -53,7 +53,7 @@ public class StorageServiceImpl implements StorageService {
         try {
             FileUtils.forceDelete(new File(path));
         } catch (IOException e) {
-
+            e.printStackTrace();
         }
     }
 }

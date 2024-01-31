@@ -12,11 +12,11 @@ import java.util.List;
 public interface GenerationService {
     void generateTicketQrCode(String data, String path) throws IOException, WriterException;
 
-    void generateOrderReceivedEmailTemplate(Order order, User user) throws IOException;
+    void generateOrderReceivedEmailTemplate(Order order, User user);
 
     void generateOrderedTicketsEmailTemplate(Order order, User user);
 
-    String generateSupportTicketReceivedTemplate(SupportTicket supportTicket, User user);
+    String generateSupportTicketReceivedTemplate(SupportTicket supportTicket);
 
     String generateSupportTicketResponseTemplate(SupportTicketReply supportTicketReply, User user);
 

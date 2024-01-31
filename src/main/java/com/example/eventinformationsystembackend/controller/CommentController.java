@@ -2,9 +2,11 @@ package com.example.eventinformationsystembackend.controller;
 
 import com.example.eventinformationsystembackend.dto.CommentDto;
 import com.example.eventinformationsystembackend.dto.CommentDtoResponse;
-import com.example.eventinformationsystembackend.service.implementation.CommentServiceImpl;
+import com.example.eventinformationsystembackend.service.CommentService;
+
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,29 +14,25 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/comments")
+@RequiredArgsConstructor
 public class CommentController {
-    private final CommentServiceImpl commentServiceImpl;
-
-    @Autowired
-    public CommentController(CommentServiceImpl commentServiceImpl) {
-        this.commentServiceImpl = commentServiceImpl;
-    }
+    private final CommentService commentService;
 
     @GetMapping("/{username}")
     public List<CommentDtoResponse> getAllCommentsByUser(
             @PathVariable String username) {
-        return commentServiceImpl.getAllCommentsByUser(username);
+        return commentService.getAllCommentsByUser(username);
     }
 
     @PatchMapping("/{id}/is-read")
     public ResponseEntity<Void> markCommentAsRead(@PathVariable Long id) {
-        commentServiceImpl.markCommentAsRead(id);
+        commentService.markCommentAsRead(id);
         return ResponseEntity.ok().build();
     }
 
     @PatchMapping("/{id}/is-removed")
     public ResponseEntity<Void> markCommentAsRemoved(@PathVariable Long id) {
-        commentServiceImpl.markCommentAsRemoved(id);
+        commentService.markCommentAsRemoved(id);
         return ResponseEntity.ok().build();
     }
 
@@ -42,12 +40,12 @@ public class CommentController {
     public CommentDtoResponse addComment(@PathVariable String username,
                                          @PathVariable Long postId,
                                          @Valid @RequestBody CommentDto commentDto) {
-        return commentServiceImpl.addComment(commentDto, postId, username);
+        return commentService.addComment(commentDto, postId, username);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteComment(@PathVariable Long id) {
-        commentServiceImpl.deleteComment(id);
+        commentService.deleteComment(id);
         return ResponseEntity.ok().build();
     }
 }

@@ -2,19 +2,19 @@ package com.example.eventinformationsystembackend.controller;
 
 import com.example.eventinformationsystembackend.dto.SupportTicketReplyDto;
 import com.example.eventinformationsystembackend.dto.SupportTicketReplyDtoResponse;
-import com.example.eventinformationsystembackend.service.implementation.SupportTicketReplyServiceImpl;
+import com.example.eventinformationsystembackend.service.SupportTicketReplyService;
+
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/support-ticket-replies")
+@RequiredArgsConstructor
 public class SupportTicketReplyController {
-    private final SupportTicketReplyServiceImpl supportTicketReplyServiceImpl;
-
-    public SupportTicketReplyController(SupportTicketReplyServiceImpl supportTicketReplyServiceImpl) {
-        this.supportTicketReplyServiceImpl = supportTicketReplyServiceImpl;
-    }
+    private final SupportTicketReplyService supportTicketReplyService;
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{username}")
@@ -22,7 +22,7 @@ public class SupportTicketReplyController {
             @Valid @RequestBody SupportTicketReplyDto supportTicketReplyDto,
             @PathVariable String username
     ) {
-        return supportTicketReplyServiceImpl.replyToSupportTicket(supportTicketReplyDto,
+        return supportTicketReplyService.replyToSupportTicket(supportTicketReplyDto,
                 username);
     }
 }

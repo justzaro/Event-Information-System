@@ -9,8 +9,10 @@ import com.example.eventinformationsystembackend.exception.ResourceNotFoundExcep
 import com.example.eventinformationsystembackend.model.Coupon;
 import com.example.eventinformationsystembackend.repository.CouponRepository;
 import com.example.eventinformationsystembackend.service.CouponService;
+import com.example.eventinformationsystembackend.service.DataValidationService;
+import com.example.eventinformationsystembackend.service.GenerationService;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -21,18 +23,12 @@ import static com.example.eventinformationsystembackend.common.CouponInformation
 import static com.example.eventinformationsystembackend.common.ExceptionMessages.*;
 
 @Service
+@RequiredArgsConstructor
 public class CouponServiceImpl implements CouponService {
     private final CouponRepository couponRepository;
-    private final GenerationServiceImpl generationServiceImpl;
-    private final ModelMapper modelMapper;
-
-    @Autowired
-    public CouponServiceImpl(CouponRepository couponRepository,
-                             GenerationServiceImpl generationServiceImpl) {
-        this.couponRepository = couponRepository;
-        this.generationServiceImpl = generationServiceImpl;
-        this.modelMapper = new ModelMapper();
-    }
+    private final GenerationService generationService;
+    private final DataValidationService dataValidationService;
+    private final ModelMapper modelMapper = new ModelMapper();
 
     @Override
     public List<CouponDtoResponse> getAllCoupons() {
@@ -63,7 +59,7 @@ public class CouponServiceImpl implements CouponService {
     @Override
     public void generateSingleUseCoupons(CouponDto couponDto) {
         List<String> generatedCouponCodes =
-                generationServiceImpl.generateCodes(
+                generationService.generateCodes(
                         couponDto.getCouponsToBeGenerated(),
                         SINGLE_USE_COUPONS_CODE_LENGTH,
                         SINGLE_USE_COUPONS_ALPHABET);
@@ -94,8 +90,8 @@ public class CouponServiceImpl implements CouponService {
 
     @Override
     public void deleteCoupon(Long id) {
-        Coupon coupon = couponRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(COUPON_DOES_NOT_EXIST));
+        Coupon coupon = dataValidationService.
+                getResourceByIdOrThrowException(id, Coupon.class, COUPON_DOES_NOT_EXIST);
 
         couponRepository.delete(coupon);
     }
