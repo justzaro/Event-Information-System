@@ -18,14 +18,10 @@ import java.util.function.Function;
 public class JwtService {
 
     private static final String SECRET_KEY = "f1402bfdb01c1d94bcd246d406044498a47ef1098360da8a5a102d13278d17ac";
-    //why subject, id.. are present but not roles. etc?
+
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
-
-//    public String extractRole(String token) {
-//        return extractAllClaims(token).get("role").toString();
-//    }
 
     public String generateToken(UserDetails userDetails) {
         return generateToken(userDetails, new HashMap<>());
@@ -44,7 +40,6 @@ public class JwtService {
                 .compact();
     }
 
-    //why user details
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
@@ -57,8 +52,6 @@ public class JwtService {
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
-
-    //learn how <T> and Function works
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
@@ -73,7 +66,6 @@ public class JwtService {
     }
 
     private Key getSignInKey() {
-        //learn about base 64, HEX, sha
         byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
         return Keys.hmacShaKeyFor(keyBytes);
     }
