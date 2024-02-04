@@ -45,4 +45,8 @@ public class ExceptionMessages {
     public static final String ACCOUNT_LOCKED_EXCEPTION = "You account is locked by authorized staff!";
 
     public static final String REQUIRED_PICTURE_IS_MISSING = "Required picture is missing!";
+    public static final String REFRESH_TOKEN_HAS_EXPIRED = "Refresh token has expired. Please, log-in again!";
+    public static final String REFRESH_TOKEN_HAS_BEEN_REVOKED = "The refresh token has been revoked!";
+    public static final String AUTH_TOKEN_HAS_BEEN_REVOKED = "The authentication token has expired!";
+
 }

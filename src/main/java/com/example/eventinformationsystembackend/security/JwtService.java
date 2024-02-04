@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.security.SecureRandom;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -52,7 +54,7 @@ public class JwtService {
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() +  1000 * 60 * 24))
+                .setExpiration(new Date(System.currentTimeMillis() +  120000))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -117,14 +119,26 @@ public class JwtService {
     }
 
     public String generateRefreshTokenString() {
-        StringBuilder randomString = new StringBuilder();
+//        StringBuilder randomString = new StringBuilder();
+//
+//        for (int i = 0; i < 30; i++) {
+//            int randomIndex = new SecureRandom().nextInt(ALLOWED_CHARACTERS.length());
+//            char randomChar = ALLOWED_CHARACTERS.charAt(randomIndex);
+//            randomString.append(randomChar);
+//        }
+//
+//        return randomString.toString();
+        LocalDateTime issuedAt = LocalDateTime.now();
+        LocalDateTime expirationTime = issuedAt.plusHours(24); // Adding 2 hours
 
-        for (int i = 0; i < 30; i++) {
-            int randomIndex = new SecureRandom().nextInt(ALLOWED_CHARACTERS.length());
-            char randomChar = ALLOWED_CHARACTERS.charAt(randomIndex);
-            randomString.append(randomChar);
-        }
+        return Jwts.builder()
+                .setIssuedAt(Date.from(issuedAt.atZone(ZoneId.systemDefault()).toInstant()))
+                .setExpiration(Date.from(expirationTime.atZone(ZoneId.systemDefault()).toInstant()))
+                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
 
-        return randomString.toString();
+    public String extractRefreshTokenCode(String code) {
+        return code.substring(7, 38);
     }
 }

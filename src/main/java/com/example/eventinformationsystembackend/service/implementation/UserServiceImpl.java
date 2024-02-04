@@ -6,8 +6,14 @@ import com.example.eventinformationsystembackend.exception.*;
 import com.example.eventinformationsystembackend.model.User;
 import com.example.eventinformationsystembackend.repository.UserRepository;
 
+import com.example.eventinformationsystembackend.security.JwtService;
 import com.example.eventinformationsystembackend.service.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 import org.modelmapper.ModelMapper;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,6 +39,8 @@ public class UserServiceImpl implements UserService {
     private final StorageService storageService;
     private final PostService postService;
     private final DataValidationService dataValidationService;
+    private final JwtService jwtService;
+    private final UserDetailsService userDetailsService;
 
     public UserDtoResponse getUser(String username) {
         User user = findUser(username);
@@ -90,8 +98,16 @@ public class UserServiceImpl implements UserService {
                                             profilePicture);
         replaceOldProfilePictureWithNewOne(profilePicture, user, newUserFolderPath);
 
+
+        System.out.println("Current username from security context: " + jwtService.getUsernameFromSecurityContext());
+        System.out.println("Current username from user object: " + user.getUsername());
         modelMapper.map(userUpdateDto, user);
         user = userRepository.save(user);
+
+        updateSecurityContext(user);
+
+        System.out.println("Username from security context after update: " + jwtService.getUsernameFromSecurityContext());
+        System.out.println("Username from user object after update" + user.getUsername());
 
         return modelMapper.map(user, UserDtoResponse.class);
     }
@@ -217,5 +233,17 @@ public class UserServiceImpl implements UserService {
                 CONFIRMATION_LINK + confirmationToken;
 
         emailService.sendConfirmationEmail(userToRegister, confirmationLink);
+    }
+
+    private void updateSecurityContext(User user) {
+        UserDetails userDetails = this.userDetailsService.loadUserByUsername(user.getUsername());
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+          userDetails,
+          null,
+          user.getAuthorities()
+        );
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 }

@@ -1,6 +1,8 @@
 package com.example.eventinformationsystembackend.security;
 
+import com.example.eventinformationsystembackend.exception.RefreshTokenHasExpiredException;
 import com.example.eventinformationsystembackend.exception.ResourceNotFoundException;
+import com.example.eventinformationsystembackend.exception.TokenHasBeenRevokedException;
 import com.example.eventinformationsystembackend.model.AuthenticationToken;
 import com.example.eventinformationsystembackend.model.RefreshToken;
 import com.example.eventinformationsystembackend.model.User;
@@ -57,6 +59,8 @@ public class AuthenticationService {
                 .user(user)
                 .build();
 
+        refreshToken = refreshTokenRepository.save(refreshToken);
+
         AuthenticationToken authenticationToken = AuthenticationToken
                 .builder()
                 .token(jwt)
@@ -64,7 +68,6 @@ public class AuthenticationService {
                 .refreshToken(refreshToken)
                 .build();
 
-        refreshTokenRepository.save(refreshToken);
         authenticationTokenRepository.save(authenticationToken);
 
         return AuthenticationResponse
@@ -75,12 +78,19 @@ public class AuthenticationService {
     }
 
     public String refreshToken(String token) {
+        System.out.println(token);
         RefreshToken refreshToken = jwtService.getRefreshToken(token);
 
-        if (refreshToken.getExpiresAt().isAfter(LocalDateTime.now())) {
+        if (refreshToken.getIsRevoked()) {
+            throw new TokenHasBeenRevokedException(REFRESH_TOKEN_HAS_BEEN_REVOKED);
+        }
+
+        if (refreshToken.getExpiresAt().isBefore(LocalDateTime.now())) {
             refreshToken.setIsRevoked(true);
             refreshToken.getAuthenticationToken().setIsRevoked(true);
-            throw new IllegalStateException("refresh token is expired");
+            authenticationTokenRepository.delete(refreshToken.getAuthenticationToken());
+            refreshTokenRepository.delete(refreshToken);
+            throw new RefreshTokenHasExpiredException(REFRESH_TOKEN_HAS_EXPIRED);
         }
 
         User user = userRepository.findUserByUsername(jwtService.getUsernameFromSecurityContext())
@@ -91,14 +101,17 @@ public class AuthenticationService {
 
         String authToken = jwtService.generateToken(user, extraClaims);
 
-        AuthenticationToken authenticationToken = AuthenticationToken
-                .builder()
-                .token(authToken)
-                .isRevoked(false)
-                .refreshToken(refreshToken)
-                .build();
+//        AuthenticationToken authenticationToken = AuthenticationToken
+//                .builder()
+//                .token(authToken)
+//                .isRevoked(false)
+//                .refreshToken(refreshToken)
+//                .build();
 
-        refreshToken.setAuthenticationToken(authenticationToken);
+        AuthenticationToken authenticationToken = refreshToken.getAuthenticationToken();
+        authenticationToken.setToken(authToken);
+
+        authenticationTokenRepository.save(authenticationToken);
 
         return authToken;
     }

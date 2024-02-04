@@ -22,6 +22,7 @@ public class AuthenticationToken {
     @Column(name = "is_revoked", nullable = false)
     private Boolean isRevoked;
 
-    @OneToOne(mappedBy = "authenticationToken")
+    @OneToOne
+    @JoinColumn(name = "refresh_token_id", referencedColumnName = "refresh_token_id", nullable = false)
     private RefreshToken refreshToken;
 }

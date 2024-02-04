@@ -95,8 +95,7 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "replier")
     private List<SupportTicketReply> supportTicketReply;
 
-    @OneToOne
-    @JoinColumn(name = "refresh_token_id", referencedColumnName = "refresh_token_id")
+    @OneToOne(mappedBy = "user")
     private RefreshToken refreshToken;
 
     @Override

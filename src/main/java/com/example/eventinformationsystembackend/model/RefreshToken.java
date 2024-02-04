@@ -31,10 +31,10 @@ public class RefreshToken {
     @Column(name = "is_revoked", nullable = false)
     private Boolean isRevoked;
 
-    @OneToOne(mappedBy = "refreshToken")
+    @OneToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false)
     private User user;
 
-    @OneToOne
-    @JoinColumn(name = "auth_token_id", referencedColumnName = "auth_token_id", nullable = false)
+    @OneToOne(mappedBy = "refreshToken")
     private AuthenticationToken authenticationToken;
 }
